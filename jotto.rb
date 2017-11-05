@@ -1,7 +1,3 @@
-def rules()
-  puts File.read("gameplay.txt")
-end
-
 def pickWord()
   word = nil
   File.foreach("words.txt").each_with_index do |line, index|
@@ -10,4 +6,20 @@ def pickWord()
   return word
 end
 
-rules()
+def generateGuesses()
+  File.open("words.txt").each do |line|
+    if (line.split("").to_a.uniq.length) == 5
+      File.open("guesses.txt", "w") do |file|
+        file.write("#{line}")
+      end
+    end
+  end
+end
+
+
+def play()
+  word = pickWord()
+  guesses = nil
+end
+
+generateGuesses()
