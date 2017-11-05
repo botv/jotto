@@ -44,7 +44,11 @@ def play()
   while playerGuess != secret && answer.between(0..5)
     playerGuess = takeGuess(playerWords, words)
     playerWords.delete(playerGuess)
-    print "Your guess and my word have #{inCommon(secret, playerGuess)}"
+    if playerGuess == secret
+      print "Oh no! You win!"
+    else
+      print "Your guess and my word have #{inCommon(secret, playerGuess)}"
+    end
     myGuess = getGuess()
     print "I guess...#{myGuess}. Enter 'true' or a number between 0 and 5 as your response."
     answer = gets.chomp
