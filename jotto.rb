@@ -50,6 +50,7 @@ def play()
       print "Your guess and my word have #{inCommon(secret, playerGuess)}"
     end
     myGuess = getGuess()
+    myWords.delete(myGuess)
     print "I guess...#{myGuess}. Enter 'true' or a number between 0 and 5 as your response."
     answer = gets.chomp
     answer = answer.to_i
@@ -60,3 +61,5 @@ def play()
     end
   end
 end
+
+play()
