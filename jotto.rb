@@ -1,5 +1,5 @@
 def getGuess(myWords) # Pick a word, any word
-  guess = words[rand(0..(guesses.length - 1)]
+  guess = words[rand(0..(guesses.length - 1))]
   return guess
 end
 
@@ -38,10 +38,10 @@ def play()
   words = getWords()
   myWords = getWords()
   playerWords = getWords()
-  secret = words[rand(0..(guesses.length - 1)]
+  secret = words[rand(0..(guesses.length - 1))]
   data = Hash.new
   playerGuess = nil
-  while playerGuess != secret && answer.between(0..5)
+  while playerGuess != secret && answer.between?(0..5)
     playerGuess = takeGuess(playerWords, words)
     playerWords.delete(playerGuess)
     if playerGuess == secret
