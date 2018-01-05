@@ -1,10 +1,9 @@
 import random
+import string
+import tools
 # import tensorflow as tf
 # import numpy as np
-import os
-import string
-
-import tools
+# import os
 
 
 class Computer(object):
@@ -13,19 +12,16 @@ class Computer(object):
         self.alphabet = {}
         for letter in alphalist:
             self.alphabet[letter] = 0
-        self.words = tools.filegrab('word_files/words.txt')
-        self.norepeat = tools.filegrab('word_files/words_without_repeats.txt')
-        self.repeat = tools.filegrab('word_files/words_with_repeats.txt')
-        self.choice = random.choice(self.repeat)
+        self.words = tools.filegrab('words/words.txt')
+        self.norepeat = tools.filegrab('words/words_without_repeats.txt')
+        self.repeat = tools.filegrab('words/words_with_repeats.txt')
+        self.choice = random.choice(self.norepeat)
 
-    def strat1(self):
-        empty = 0
-
-    def strat2(self):
-        empty = 0
-
-    def strat3(self):
-        empty = 0
+    def eval_guess(self, guess):
+        common = 0
+        for letter in set(guess):
+            common += self.choice.count(letter)
+        return common
 
 
 class Human(object):
@@ -34,15 +30,16 @@ class Human(object):
         self.alphabet = {}
         for letter in self.alphalist:
             self.alphabet[letter] = 0
-        self.words = tools.filegrab('word_files/words.txt')
+        self.words = tools.filegrab('words/words.txt')
 
 
 class Self_Play(object):
     def __init__(self):
-        computer = Computer()
+        self.computer = Computer()
 
 
 if __name__ == "__main__":
-    os.system('clear')
     comp = Computer()
-    print(comp.choice)
+    # print(comp.choice)
+    common = comp.eval_guess("eeeee")
+    print(comp.choice, common)
