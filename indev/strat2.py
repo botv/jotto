@@ -96,16 +96,3 @@ class Computer(object):
             self.repeat.remove(guess)
         self.for_guessing.remove(guess)
         self.ownguesses[guess] = common
-
-    def choose_strat(self):
-        prob1 = 0.33
-        prob2 = 0.33
-        prob3 = 0.33
-        draw = choice(['strat1', 'strat2', 'strat3'], 1, [prob1, prob2, prob3])
-        return draw
-
-
-if __name__ == "__main__":
-    comp = Computer()
-    draw = comp.choose_strat
-    print(draw)

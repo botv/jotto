@@ -22,8 +22,8 @@ class Computer:
         self.repeat = filegrab('words/words_with_repeats.txt')
         self.choice = random.choice(self.norepeat)
         self.own_guesses = {}
-        self.received_guesses = {}
         self.possible = self.norepeat
+        self.last_guess = None
 
     def update_lists(self, guess, common):
         # Removes OWN guess from list and appends it to
@@ -77,27 +77,58 @@ class Computer:
         strat = np.random.choice(['strat1', 'strat2', 'strat3'], 1,
                                  p=[prob1, prob2, prob3])
         guess = getattr(self, strat[0])()
-        return guess
+        self.last_guess = guess
+        return [strat[0], guess]
 
 
-class Human:
-    # For playing with humans
+class Learning:
     def __init__(self):
-        self.alphalist = list(string.ascii_lowercase)
-        self.alphabet = {}
-        for letter in self.alphalist:
-            self.alphabet[letter] = 0
-        self.words = filegrab('words/words.txt')
+        self.p1 = Computer()
+        self.p2 = Computer()
+        self.sessions = open('states/sessions.txt', 'r+')
+        self.states_file = (open('states/states.txt', 'r')
+        self.states_list_unparsed = filegrab('states/states.txt')
+        self.sess_id = int(self.sessions.readline()) + 1
+        self.sess_file = open('states/sess' + (self.sess_id) + '.txt', 'w+')
 
+    def record_p1_state(self, game, strategy, guess, common):
+        self.games.append(self.p1.update_alphabet(self.p1.alphabet) + ':'
+                          + strategy + ';'
+                          + guess + ':' + common)
 
-class Self_Play:
-    def __init__(self):
-        self.player1 = Computer()
-        self.player2 = Computer()
+    def record_p2_state(self, game, strategy, guess, common):
+        self.games.append(self.p2.alphabet + ':'
+                          + strategy + ';'
+                          + guess + ':' + common)
+
+    def play(self, games):
+        self.sessions.write(self.sess_id)
+        game = 1
+        while game <= games:
+            self.sess_file.append('-' + game)
+            game_over = False
+            turn = 1
+            while not game_over:
+                self.sess_file.append('--2' + turn)
+                guess1 = self.p1.guess()
+                eval1 = self.p2.eval_guess(guess1)
+                self.record_p1_state(game, guess1[0], guess1[1], eval1)
+                if eval1 != 5:
+                    self.sess_file.append('--2' + turn)
+                    guess2 = self.p2.guess()
+                    eval2 = self.p1.eval_guess(guess2)
+                    self.record_state(game, guess2[0], guess2[1], eval2)
+                    if eval2 == 5:
+                        game_over = True
+                else:
+                    game_over = True
+                turn += 1
+            game += 1
 
 
 def main():
-    comp = Computer()
+    game = Learning()
+    game.play(1)
 
 
 if __name__ == "__main__":

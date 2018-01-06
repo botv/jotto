@@ -1,0 +1,8 @@
+-1
+chase;sweat
+--11
+<alphabet>:2;sweet:4
+--21
+<alphabet>:2;chose:4
+--12
+<alphabet>:1;sweat:5
