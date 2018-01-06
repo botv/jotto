@@ -1,8 +1,8 @@
 import random
 import string
 import tools
+import numpy as np
 # import tensorflow as tf
-# import numpy as np
 # import os
 
 
@@ -11,7 +11,7 @@ class Computer(object):
         alphalist = list(string.ascii_lowercase)
         self.alphabet = {}
         for letter in alphalist:
-            self.alphabet[letter] = 0
+            self.alphabet[letter] = [0, 0, []]
         self.words = tools.filegrab('words/words.txt')
         self.norepeat = tools.filegrab('words/words_without_repeats.txt')
         self.repeat = tools.filegrab('words/words_with_repeats.txt')
@@ -22,6 +22,14 @@ class Computer(object):
         for letter in set(guess):
             common += self.choice.count(letter)
         return common
+
+    def choose_strat(self):
+        prob1 = 1/3.0
+        prob2 = 1/3.0
+        prob3 = 1/3.0
+        draw = np.random.choice(['strat1', 'strat2', 'strat3'], 1,
+                                p=[prob1, prob2, prob3])
+        return draw
 
 
 class Human(object):
@@ -35,11 +43,11 @@ class Human(object):
 
 class Self_Play(object):
     def __init__(self):
-        self.computer = Computer()
+        self.player1 = Computer()
+        self.player2 = Computer()
 
 
 if __name__ == "__main__":
     comp = Computer()
-    # print(comp.choice)
-    common = comp.eval_guess("eeeee")
-    print(comp.choice, common)
+    draw = comp.choose_strat()
+    print(draw)
