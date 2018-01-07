@@ -16,7 +16,6 @@ class Computer:
         self.alphabet = {}
         for letter in alphalist:
             self.alphabet[letter] = [0, 0, []]
-        self.alphabet['a'] = [0, 1, []]
         self.words = filegrab('words/words.txt')
         self.for_guessing = self.words
         self.norepeat = filegrab('words/words_without_repeats.txt')
@@ -111,6 +110,36 @@ class Computer:
                 knownNotLetsInd += 1
             ind += 1
 
+    def eliminate_letter(self, let):
+        letter = self.alphabet[let]
+        if letter[1] == -1:
+            return False
+        letterInPossible = False
+        ind = 0
+        knownLets = []
+        for lett in self.alphabet:
+            if self.alphabet[lett][1] == 1:
+                knownLets.append(lett)
+        for guess in letter[2]:
+            unknownLetsInGuess = self.own_guesses[guess]
+            for lett in knownLets:
+                if lett in guess:
+                    unknownLetsInGuess -= 1
+            if unknownLetsInGuess == 0:
+                return False
+        while ind < len(self.possible) and not letterInPossible:
+            word = self.possible[ind]
+            if let in word:
+                letterInPossible = True
+            ind += 1
+        if not letterInPossible:
+            return False
+
+    def update_alphabet(self, guess, common):
+        # Super important function that updates the alphabet every turn
+        for letter in guess:
+            self.eliminate_letter(letter)
+
 
 class Learning:
     def __init__(self):
@@ -159,6 +188,13 @@ class Learning:
 
 def main():
     comp = Computer()
+    comp.alphabet["v"][1] = 1
+    comp.alphabet["e"][1] = 1
+    comp.alphabet["n"][1] = 1
+    comp.alphabet["o"][1] = 1
+    comp.alphabet["m"][1] = 1
+    comp.update_possible
+    print comp.possible
 
 
 if __name__ == "__main__":

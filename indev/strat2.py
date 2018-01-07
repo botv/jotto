@@ -78,3 +78,4 @@ class Computer(object):
             while guessInd < len(letter[2]) and not confirmed:
                 otherKnownFalse
                 for let in letter[2][guessInd]:
+                    print("hello")
