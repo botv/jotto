@@ -86,7 +86,7 @@ class Learning:
         self.p1 = Computer()
         self.p2 = Computer()
         self.sessions = open('states/sessions.txt', 'r+')
-        self.states_file = (open('states/states.txt', 'r')
+        self.states_file = open('states/states.txt', 'r')
         self.states_list_unparsed = filegrab('states/states.txt')
         self.sess_id = int(self.sessions.readline()) + 1
         self.sess_file = open('states/sess' + (self.sess_id) + '.txt', 'w+')
