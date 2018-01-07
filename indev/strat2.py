@@ -21,13 +21,6 @@ class Computer(object):
         self.received_guesses = {}
         self.possible = self.norepeat
 
-    def eval_guess(self, guess):
-        # Counts common letters between self.choice and guess
-        common = 0
-        for letter in set(guess):
-            common += self.choice.count(letter)
-        return common
-
     def update_possible(self):
         knownLets = []
         knownNotLets = []

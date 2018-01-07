@@ -81,6 +81,7 @@ class Computer:
         return [strat[0], guess]
 
     def update_possible(self):
+        # BUGGY
         knownLets = []
         knownNotLets = []
         for lett in self.alphabet:
@@ -122,6 +123,7 @@ class Computer:
                 knownLets.append(lett)
         for guess in letter[2]:
             unknownLetsInGuess = self.own_guesses[guess]
+            print unknownLetsInGuess
             for lett in knownLets:
                 if lett in guess:
                     unknownLetsInGuess -= 1
@@ -134,6 +136,7 @@ class Computer:
             ind += 1
         if not letterInPossible:
             return False
+        return True
 
     def update_alphabet(self, guess, common):
         # Super important function that updates the alphabet every turn
@@ -188,13 +191,6 @@ class Learning:
 
 def main():
     comp = Computer()
-    comp.alphabet["v"][1] = 1
-    comp.alphabet["e"][1] = 1
-    comp.alphabet["n"][1] = 1
-    comp.alphabet["o"][1] = 1
-    comp.alphabet["m"][1] = 1
-    comp.update_possible
-    print comp.possible
 
 
 if __name__ == "__main__":
