@@ -47,6 +47,7 @@ class Computer(object):
                     self.possible.remove(word)
                     ind -= 1
                     wordRemoved = True
+                knownLetsInd += 1
             knownNotLetsInd = 0
             while knownNotLetsInd < len(knownNotLets) and not wordRemoved:
                 let = knownNotLets[knownNotLetsInd]
@@ -54,6 +55,7 @@ class Computer(object):
                     self.possible.remove(word)
                     ind -= 1
                     wordRemoved = True
+                knownNotLetsInd += 1
             ind += 1
 
     def eliminate_letter(self, let):
