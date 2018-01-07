@@ -69,7 +69,6 @@ class Computer(object):
         if not letterInPossible:
             return False
 
-
     def find_known_letters(self):
         for letter in alphabet:
             guessInd = 0
@@ -77,22 +76,3 @@ class Computer(object):
             while guessInd < len(letter[2]) and not confirmed:
                 otherKnownFalse
                 for let in letter[2][guessInd]:
-
-    def guess(self):
-        # Chooses a strategy with weighted probabilities
-        prob1 = 1/3.0
-        prob2 = 1/3.0
-        prob3 = 1/3.0
-        strat = np.random.choice(['strat1', 'strat2', 'strat3'], 1,
-                                 p=[prob1, prob2, prob3])
-        guess = getattr(self, strat)()
-        return guess
-
-    def update_lists(self, guess, common):
-        # Removes OWN guess from list and appends it to
-        if len(set(guess)) == len(guess):
-            self.norepeat.remove(guess)
-        else:
-            self.repeat.remove(guess)
-        self.for_guessing.remove(guess)
-        self.ownguesses[guess] = common

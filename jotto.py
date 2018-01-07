@@ -16,6 +16,7 @@ class Computer:
         self.alphabet = {}
         for letter in alphalist:
             self.alphabet[letter] = [0, 0, []]
+        self.alphabet['a'] = [0, 1, []]
         self.words = filegrab('words/words.txt')
         self.for_guessing = self.words
         self.norepeat = filegrab('words/words_without_repeats.txt')
@@ -80,6 +81,36 @@ class Computer:
         self.last_guess = guess
         return [strat[0], guess]
 
+    def update_possible(self):
+        knownLets = []
+        knownNotLets = []
+        for lett in self.alphabet:
+            if self.alphabet[lett][1] == 1:
+                knownLets.append(lett)
+            elif self.alphabet[lett][1] == -1:
+                knownNotLets.append(lett)
+        ind = 0
+        while ind < len(self.possible):
+            word = self.possible[ind]
+            knownLetsInd = 0
+            wordRemoved = False
+            while knownLetsInd < len(knownLets) and not wordRemoved:
+                let = knownLets[knownLetsInd]
+                if let not in word:
+                    self.possible.remove(word)
+                    ind -= 1
+                    wordRemoved = True
+                knownLetsInd += 1
+            knownNotLetsInd = 0
+            while knownNotLetsInd < len(knownNotLets) and not wordRemoved:
+                let = knownNotLets[knownNotLetsInd]
+                if let in word:
+                    self.possible.remove(word)
+                    ind -= 1
+                    wordRemoved = True
+                knownNotLetsInd += 1
+            ind += 1
+
 
 class Learning:
     def __init__(self):
@@ -127,8 +158,7 @@ class Learning:
 
 
 def main():
-    game = Learning()
-    game.play(1)
+    comp = Computer()
 
 
 if __name__ == "__main__":
