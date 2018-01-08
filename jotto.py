@@ -159,14 +159,14 @@ class Learning:
         self.gam = open('states/games/sess' + str(self.sess_id) + '.txt', 'w+')
 
     def record_p1_state(self, p1, game, strategy, guess, common):
-        self.gam.write(str(p1.alphabet) + ':'
+        self.gam.write(str(p1.alphabet) + ';'
                        + strategy + ';'
-                       + guess + ':' + str(common) + '\n')
+                       + guess + ';' + str(common) + '\n')
 
     def record_p2_state(self, p2, game, strategy, guess, common):
-        self.gam.write(str(p2.alphabet) + ':'
+        self.gam.write(str(p2.alphabet) + ';'
                        + strategy + ';'
-                       + guess + ':' + str(common) + '\n')
+                       + guess + ';' + str(common) + '\n')
 
     def play(self, games):
         self.sessions.seek(0)
@@ -179,6 +179,7 @@ class Learning:
             p2 = Computer()
             self.gam.write('-' + str(game) + '\n')
             game_over = False
+            winner = None
             turn = 1
             while not game_over:
                 self.gam.write('--1' + str(turn) + '\n')
@@ -192,14 +193,17 @@ class Learning:
                     self.record_p2_state(p2, game, guess2[0], guess2[1], eval2)
                     if guess2[1] == p1.choice:
                         game_over = True
+                        winner = "p2"
                 else:
                     game_over = True
+                    winner = "p1"
                 turn += 1
             game += 1
         elapsed = time.time() - start_time
         self.time_file.write(str(round(elapsed, 3))
                              + ":" + str(turn - 1) + ":"
-                             + str(int((turn - 1) / elapsed)) + "\n")
+                             + str(int((turn - 1) / elapsed))
+                             + ":" + winner + "\n")
 
 
 def main():
