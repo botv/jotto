@@ -3,6 +3,7 @@
 
 import random
 import string
+import time
 import numpy as np
 # import tensorflow as tf
 # import os
@@ -151,7 +152,8 @@ class Computer:
 class Learning:
     def __init__(self):
         self.sessions = open('states/sessions.txt', 'r+')
-        self.states_file = open('states/states.txt', 'r')
+        self.time_file = open('states/turntime.txt', 'a')
+        self.states_file = open('states/states.txt', 'r+')
         self.states_list_unparsed = filegrab('states/states.txt')
         self.sess_id = int(self.sessions.readline()) + 1
         self.gam = open('states/games/sess' + str(self.sess_id) + '.txt', 'w+')
@@ -167,8 +169,11 @@ class Learning:
                        + guess + ':' + str(common) + '\n')
 
     def play(self, games):
+        self.sessions.seek(0)
+        self.sessions.truncate()
         self.sessions.write(str(self.sess_id))
         game = 1
+        start_time = time.time()
         while game <= games:
             p1 = Computer()
             p2 = Computer()
@@ -178,24 +183,28 @@ class Learning:
             while not game_over:
                 self.gam.write('--1' + str(turn) + '\n')
                 guess1 = p1.guess()
-                eval1 = p2.eval_guess(guess1)
+                eval1 = p2.eval_guess(guess1[1])
                 self.record_p1_state(p1, game, guess1[0], guess1[1], eval1)
-                if eval1 is not 5:
+                if guess1[1] is not p2.choice:
                     self.gam.write('--2' + str(turn) + '\n')
                     guess2 = p2.guess()
-                    eval2 = p1.eval_guess(guess2)
+                    eval2 = p1.eval_guess(guess2[1])
                     self.record_p2_state(p2, game, guess2[0], guess2[1], eval2)
-                    if eval2 is 5:
+                    if guess2[1] == p1.choice:
                         game_over = True
                 else:
                     game_over = True
                 turn += 1
             game += 1
+        elapsed = time.time() - start_time
+        self.time_file.write(str(round(elapsed, 3))
+                             + ":" + str(turn - 1) + ":"
+                             + str(int((turn - 1) / elapsed)) + "\n")
 
 
 def main():
     game = Learning()
-    game.play(5)
+    game.play(1)
 
 
 if __name__ == "__main__":
