@@ -150,42 +150,42 @@ class Computer:
 
 class Learning:
     def __init__(self):
-        self.p1 = Computer()
-        self.p2 = Computer()
         self.sessions = open('states/sessions.txt', 'r+')
         self.states_file = open('states/states.txt', 'r')
         self.states_list_unparsed = filegrab('states/states.txt')
         self.sess_id = int(self.sessions.readline()) + 1
         self.gam = open('states/games/sess' + str(self.sess_id) + '.txt', 'w+')
 
-    def record_p1_state(self, game, strategy, guess, common):
-        self.gam.write(str(self.p1.alphabet) + ':'
+    def record_p1_state(self, p1, game, strategy, guess, common):
+        self.gam.write(str(p1.alphabet) + ':'
                        + strategy + ';'
-                       + guess + ':' + str(common))
+                       + guess + ':' + str(common) + '\n')
 
-    def record_p2_state(self, game, strategy, guess, common):
-        self.gam.write(str(self.p1.alphabet) + ':'
+    def record_p2_state(self, p2, game, strategy, guess, common):
+        self.gam.write(str(p2.alphabet) + ':'
                        + strategy + ';'
-                       + guess + ':' + str(common))
+                       + guess + ':' + str(common) + '\n')
 
     def play(self, games):
         self.sessions.write(str(self.sess_id))
         game = 1
         while game <= games:
-            self.gam.write('-' + str(game))
+            p1 = Computer()
+            p2 = Computer()
+            self.gam.write('-' + str(game) + '\n')
             game_over = False
             turn = 1
             while not game_over:
-                self.gam.write('--2' + str(turn))
-                guess1 = self.p1.guess()
-                eval1 = self.p2.eval_guess(guess1)
-                self.record_p1_state(game, guess1[0], guess1[1], eval1)
-                if eval1 != 5:
-                    self.gam.write('--2' + str(turn))
-                    guess2 = self.p2.guess()
-                    eval2 = self.p1.eval_guess(guess2)
-                    self.record_p2_state(game, guess2[0], guess2[1], eval2)
-                    if eval2 == 5:
+                self.gam.write('--1' + str(turn) + '\n')
+                guess1 = p1.guess()
+                eval1 = p2.eval_guess(guess1)
+                self.record_p1_state(p1, game, guess1[0], guess1[1], eval1)
+                if eval1 is not 5:
+                    self.gam.write('--2' + str(turn) + '\n')
+                    guess2 = p2.guess()
+                    eval2 = p1.eval_guess(guess2)
+                    self.record_p2_state(p2, game, guess2[0], guess2[1], eval2)
+                    if eval2 is 5:
                         game_over = True
                 else:
                     game_over = True
@@ -195,7 +195,7 @@ class Learning:
 
 def main():
     game = Learning()
-    game.play(1)
+    game.play(5)
 
 
 if __name__ == "__main__":

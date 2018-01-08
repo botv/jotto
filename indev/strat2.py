@@ -1,7 +1,7 @@
 import random
 import string
 import tools
-import numpy as np
+# import numpy as np
 # import tensorflow as tf
 # import os
 
