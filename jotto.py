@@ -1,3 +1,6 @@
+# The Jottobot
+# Ben Botvinick & Robert May, 2018
+
 import random
 import string
 import numpy as np
@@ -112,6 +115,7 @@ class Computer:
             ind += 1
 
     def eliminate_letter(self, let):
+        # Eliminate a letter using fantastic logic
         letter = self.alphabet[let]
         if letter[1] == -1:
             return False
@@ -190,7 +194,7 @@ class Learning:
 
 
 def main():
-    comp = Computer()
+    print("Coming soon!")
 
 
 if __name__ == "__main__":
