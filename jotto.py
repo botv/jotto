@@ -39,7 +39,7 @@ class Computer:
 
     def strat1(self):
         # Cover as many letters as possible
-        if self.own_guesses[0]:
+        if len(self.own_guesses) is not 0:
             letters = []
             for guess in self.own_guesses:
                 for letter in list(guess):
@@ -74,9 +74,9 @@ class Computer:
 
     def guess(self):
         # Chooses a strategy with weighted probabilities
-        prob1 = 1/3.0
-        prob2 = 1/3.0
-        prob3 = 1/3.0
+        prob1 = 1
+        prob2 = 0
+        prob3 = 0
         strat = np.random.choice(['strat1', 'strat2', 'strat3'], 1,
                                  p=[prob1, prob2, prob3])
         guess = getattr(self, strat[0])()
@@ -156,35 +156,35 @@ class Learning:
         self.states_file = open('states/states.txt', 'r')
         self.states_list_unparsed = filegrab('states/states.txt')
         self.sess_id = int(self.sessions.readline()) + 1
-        self.sess_file = open('states/sess' + (self.sess_id) + '.txt', 'w+')
+        self.gam = open('states/games/sess' + str(self.sess_id) + '.txt', 'w+')
 
     def record_p1_state(self, game, strategy, guess, common):
-        self.games.append(self.p1.update_alphabet(self.p1.alphabet) + ':'
-                          + strategy + ';'
-                          + guess + ':' + common)
+        self.gam.write(str(self.p1.alphabet) + ':'
+                       + strategy + ';'
+                       + guess + ':' + str(common))
 
     def record_p2_state(self, game, strategy, guess, common):
-        self.games.append(self.p2.alphabet + ':'
-                          + strategy + ';'
-                          + guess + ':' + common)
+        self.gam.write(str(self.p1.alphabet) + ':'
+                       + strategy + ';'
+                       + guess + ':' + str(common))
 
     def play(self, games):
-        self.sessions.write(self.sess_id)
+        self.sessions.write(str(self.sess_id))
         game = 1
         while game <= games:
-            self.sess_file.append('-' + game)
+            self.gam.write('-' + str(game))
             game_over = False
             turn = 1
             while not game_over:
-                self.sess_file.append('--2' + turn)
+                self.gam.write('--2' + str(turn))
                 guess1 = self.p1.guess()
                 eval1 = self.p2.eval_guess(guess1)
                 self.record_p1_state(game, guess1[0], guess1[1], eval1)
                 if eval1 != 5:
-                    self.sess_file.append('--2' + turn)
+                    self.gam.write('--2' + str(turn))
                     guess2 = self.p2.guess()
                     eval2 = self.p1.eval_guess(guess2)
-                    self.record_state(game, guess2[0], guess2[1], eval2)
+                    self.record_p2_state(game, guess2[0], guess2[1], eval2)
                     if eval2 == 5:
                         game_over = True
                 else:
@@ -194,7 +194,8 @@ class Learning:
 
 
 def main():
-    print("Coming soon!")
+    game = Learning()
+    game.play(1)
 
 
 if __name__ == "__main__":
