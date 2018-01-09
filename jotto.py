@@ -43,12 +43,16 @@ class Computer:
         if len(self.own_guesses) is not 0:
             letters = []
             for guess in self.own_guesses:
+                print "in own_guesses"
+                print list(guess)
                 for letter in list(guess):
+                    print "in list(guess)"
                     letters.append(letter)
             letters = set(letters)
             run = True
             ind = 0
             while run:
+                print "run = true"
                 if len(letters) == 0:
                     return random.choice(self.for_guessing)
                 if ind < len(self.for_guessing):
@@ -180,10 +184,11 @@ class Computer:
     def update_alphabet(self, guess, common):
         # Super important function that updates the alphabet every turn
         self.own_guesses[guess] = common
-        for letter in guess:
+        for letter in set(guess):
             if not self.eliminate_letter(letter):
                 self.alphabet[letter][1] = -1
             self.alphabet[letter][2].append(guess)
+            self.alphabet[letter][0] += 1
         stillFinding = True
         stillEliminating = True
         while stillFinding or stillEliminating:
@@ -246,19 +251,25 @@ class Learning:
             winner = None
             turn = 1
             while not game_over:
+                print "Started"
                 self.gam.write('--1' + str(turn) + '\n')
+                print "before guess"
                 guess1 = p1.guess()
+                print "before eval guess"
                 eval1 = p2.eval_guess(guess1[1])
-                p1.update_lists(guess1[1], eval1)
-                # p1.update_alphabet(guess1[1], eval1)
+                print "before 1st update"
+                p1.update_alphabet(guess1[1], eval1)
+                print "updated 1"
                 self.record_p1_state(p1, game, guess1[0], guess1[1], eval1)
                 if guess1[1] != p2.choice:
+                    print "player 2:"
                     self.gam.write('--2' + str(turn) + '\n')
                     guess2 = p2.guess()
                     eval2 = p1.eval_guess(guess2[1])
-                    p2.update_lists(guess2[1], eval2)
-                    # p2.update_alphabet(guess2[1], eval2)
+                    p2.update_alphabet(guess2[1], eval2)
+                    print "Finished Both"
                     self.record_p2_state(p2, game, guess2[0], guess2[1], eval2)
+                    print "recorded"
                     if guess2[1] == p1.choice:
                         game_over = True
                         winner = "2"
