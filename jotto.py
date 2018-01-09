@@ -269,7 +269,7 @@ class Learning:
 
 def main():
     game = Learning()
-    game.play(3)
+    game.play(1)
 
 
 if __name__ == "__main__":
