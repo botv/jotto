@@ -168,7 +168,16 @@ class Learning:
                        + strategy + ';'
                        + guess + ';' + str(common) + '\n')
 
+    def parser(self, games, winners):
+        lines = filegrab(self.gam)
+        for game in games:
+            for line in lines:
+                if (list(line.split("")))[:3] is ("--" + winners[game - 1]):
+                    print("HEllo")
+
     def play(self, games):
+        if games > 9:
+            games = 9
         self.sessions.seek(0)
         self.sessions.truncate()
         self.sessions.write(str(self.sess_id))
@@ -177,7 +186,8 @@ class Learning:
         while game <= games:
             p1 = Computer()
             p2 = Computer()
-            self.gam.write('-' + str(game) + '\n')
+            if game != 1:
+                self.gam.write("=")
             game_over = False
             winner = None
             turn = 1
@@ -186,29 +196,29 @@ class Learning:
                 guess1 = p1.guess()
                 eval1 = p2.eval_guess(guess1[1])
                 self.record_p1_state(p1, game, guess1[0], guess1[1], eval1)
-                if guess1[1] is not p2.choice:
+                if guess1[1] != p2.choice:
                     self.gam.write('--2' + str(turn) + '\n')
                     guess2 = p2.guess()
                     eval2 = p1.eval_guess(guess2[1])
                     self.record_p2_state(p2, game, guess2[0], guess2[1], eval2)
                     if guess2[1] == p1.choice:
                         game_over = True
-                        winner = "p2"
+                        winner = "2"
                 else:
                     game_over = True
-                    winner = "p1"
+                    winner = "1"
                 turn += 1
             game += 1
-        elapsed = time.time() - start_time
-        self.time_file.write(str(round(elapsed, 3))
-                             + ":" + str(turn - 1) + ":"
-                             + str(int((turn - 1) / elapsed))
-                             + ":" + winner + "\n")
+            elapsed = time.time() - start_time
+            self.time_file.write(str(round(elapsed, 3))
+                                 + ":" + str(turn - 1) + ":"
+                                 + str(int((turn - 1) / elapsed))
+                                 + ":" + winner + "\n")
 
 
 def main():
     game = Learning()
-    game.play(1)
+    game.play(3)
 
 
 if __name__ == "__main__":
