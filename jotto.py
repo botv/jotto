@@ -250,7 +250,6 @@ class Learning:
                     guess2 = p2.guess()
                     eval2 = p1.eval_guess(guess2[1])
                     # p2.update_alphabet(guess2[1], eval2)
-                    print "Finished Both"
                     self.record_p2_state(p2, game, guess2[0], guess2[1], eval2)
                     if guess2[1] == p1.choice:
                         game_over = True
