@@ -181,7 +181,6 @@ class Computer:
         stillFinding = True
         stillEliminating = True
         while stillFinding or stillEliminating:
-            print "working"
             find_known_letters = self.find_known_letters()
             if find_known_letters is False:
                 stillFinding = False
@@ -244,13 +243,14 @@ class Learning:
                 self.gam.write('--1' + str(turn) + '\n')
                 guess1 = p1.guess()
                 eval1 = p2.eval_guess(guess1[1])
-                # p1.update_alphabet(guess1[1], eval1)
+                p1.update_alphabet(guess1[1], eval1)
                 self.record_p1_state(p1, game, guess1[0], guess1[1], eval1)
                 if guess1[1] != p2.choice:
                     self.gam.write('--2' + str(turn) + '\n')
                     guess2 = p2.guess()
                     eval2 = p1.eval_guess(guess2[1])
-                    # p2.update_alphabet(guess2[1], eval2)
+                    p2.update_alphabet(guess2[1], eval2)
+                    print "Finished Both"
                     self.record_p2_state(p2, game, guess2[0], guess2[1], eval2)
                     if guess2[1] == p1.choice:
                         game_over = True
