@@ -36,7 +36,7 @@ class Computer:
         else:
             self.repeat.remove(guess)
         self.for_guessing.remove(guess)
-        self.ownguesses[guess] = common
+        self.own_guesses[guess] = common
 
     def strat1(self):
         # Cover as many letters as possible
@@ -49,14 +49,20 @@ class Computer:
             run = True
             ind = 0
             while run:
-                word = self.for_guessing[ind]
-                if not any(x in word for x in letters):
-                    guess = word
-                    run = False
-                if not guess:
+                if len(letters) == 0:
+                    return random.choice(self.for_guessing)
+                if ind < len(self.for_guessing):
+                    word = self.for_guessing[ind]
+                    if not any(x in word for x in letters):
+                        guess = word
+                        run = False
+                    else:
+                        ind += 1
+                else:
                     letters.pop()
+            return guess
         else:
-            return random.choice(self.norepeat)
+            return random.choice(self.for_guessing)
 
     def strat2(self):
         # Make the best possible guess
@@ -243,12 +249,14 @@ class Learning:
                 self.gam.write('--1' + str(turn) + '\n')
                 guess1 = p1.guess()
                 eval1 = p2.eval_guess(guess1[1])
+                p1.update_lists(guess1[1], eval1)
                 # p1.update_alphabet(guess1[1], eval1)
                 self.record_p1_state(p1, game, guess1[0], guess1[1], eval1)
                 if guess1[1] != p2.choice:
                     self.gam.write('--2' + str(turn) + '\n')
                     guess2 = p2.guess()
                     eval2 = p1.eval_guess(guess2[1])
+                    p2.update_lists(guess2[1], eval2)
                     # p2.update_alphabet(guess2[1], eval2)
                     self.record_p2_state(p2, game, guess2[0], guess2[1], eval2)
                     if guess2[1] == p1.choice:
