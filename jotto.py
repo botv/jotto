@@ -9,7 +9,7 @@ import numpy as np
 # import os
 
 
-def filegrab(file):
+def filearr(file):
     words = [line.rstrip('\n') for line in open(file)]
     return words
 
@@ -20,10 +20,10 @@ class Computer:
         self.alphabet = {}
         for letter in alphalist:
             self.alphabet[letter] = [0, 0, []]
-        self.words = filegrab('words/words.txt')
+        self.words = filearr('words/words.txt')
         self.for_guessing = self.words
-        self.norepeat = filegrab('words/words_without_repeats.txt')
-        self.repeat = filegrab('words/words_with_repeats.txt')
+        self.norepeat = filearr('words/words_without_repeats.txt')
+        self.repeat = filearr('words/words_with_repeats.txt')
         self.choice = random.choice(self.norepeat)
         self.own_guesses = {}
         self.possible = self.norepeat
@@ -44,7 +44,7 @@ class Computer:
             letters = []
             for guess in self.own_guesses:
                 for letter in list(guess):
-                    letters.push(letter)
+                    letters.append(letter)
             letters = set(letters)
             run = True
             ind = 0
@@ -116,7 +116,6 @@ class Computer:
             ind += 1
 
     def eliminate_letter(self, let):
-        # Eliminate a letter using fantastic logic
         letter = self.alphabet[let]
         if letter[1] == -1:
             return False
@@ -126,9 +125,10 @@ class Computer:
         for lett in self.alphabet:
             if self.alphabet[lett][1] == 1:
                 knownLets.append(lett)
+        if let in knownLets:
+            return True
         for guess in letter[2]:
             unknownLetsInGuess = self.own_guesses[guess]
-            print unknownLetsInGuess
             for lett in knownLets:
                 if lett in guess:
                     unknownLetsInGuess -= 1
@@ -143,10 +143,56 @@ class Computer:
             return False
         return True
 
+    def find_known_letters(self):
+        knownLets = []
+        tempKnownLets = []
+        knownNotLets = []
+        for lett in self.alphabet:
+            if self.alphabet[lett][1] == 1:
+                knownLets.append(lett)
+                tempKnownLets.append(lett)
+            elif self.alphabet[lett][1] == -1:
+                knownNotLets.append(lett)
+        for guess in self.own_guesses:
+            commonLetsInGuess = self.own_guesses[guess]
+            unknownLetsInGuess = 0
+            for lett in guess:
+                if lett in knownLets:
+                    commonLetsInGuess -= 1
+                if self.alphabet[lett][1] == 0:
+                    unknownLetsInGuess += 1
+            if commonLetsInGuess == unknownLetsInGuess:
+                for lett in guess:
+                    if self.alphabet[lett][1] == 0:
+                        knownLets.append(lett)
+                        self.alphabet[lett][1] = 1
+        if knownLets == tempKnownLets:
+            return False
+        else:
+            return knownLets
+
     def update_alphabet(self, guess, common):
         # Super important function that updates the alphabet every turn
+        self.own_guesses[guess] = common
         for letter in guess:
-            self.eliminate_letter(letter)
+            if not self.eliminate_letter(letter):
+                self.alphabet[letter][1] = -1
+            self.alphabet[letter][2].append(guess)
+        stillFinding = True
+        stillEliminating = True
+        while stillFinding or stillEliminating:
+            find_known_letters = self.find_known_letters()
+            if find_known_letters is False:
+                stillFinding = False
+            else:
+                for letter in find_known_letters:
+                    self.alphabet[letter][1] = 1
+            stillEliminating = False
+            for letter in self.alphabet:
+                if (not self.eliminate_letter(letter) and
+                        self.alphabet[letter][1] != -1):
+                    self.alphabet[letter][1] = -1
+                    stillEliminating = True
 
 
 class Learning:
@@ -154,7 +200,7 @@ class Learning:
         self.sessions = open('states/sessions.txt', 'r+')
         self.time_file = open('states/turntime.txt', 'a')
         self.states_file = open('states/states.txt', 'r+')
-        self.states_list_unparsed = filegrab('states/states.txt')
+        self.states_list_unparsed = filearr('states/states.txt')
         self.sess_id = int(self.sessions.readline()) + 1
         self.gam = open('states/games/sess' + str(self.sess_id) + '.txt', 'w+')
 
@@ -169,11 +215,12 @@ class Learning:
                        + guess + ';' + str(common) + '\n')
 
     def parser(self, games, winners):
-        lines = filegrab(self.gam)
+        lines = filearr(self.gam)
         for game in games:
             for line in lines:
                 if (list(line.split("")))[:3] is ("--" + winners[game - 1]):
                     print("HEllo")
+        print lines
 
     def play(self, games):
         if games > 9:
