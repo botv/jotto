@@ -46,6 +46,8 @@ class Computer:
                 for letter in list(guess):
                     letters.append(letter)
             letters = set(letters)
+            if len(letters) == 26:
+                letters.pop()
             run = True
             ind = 0
             while run:
@@ -211,13 +213,14 @@ class Learning:
         self.sess_id = int(self.sessions.readline()) + 1
         self.gam = open('states/games/sess' + str(self.sess_id) + '.txt', 'w+')
 
-    def record_p1_state(self, p1, game, strategy, guess, common):
-        self.gam.write(str(p1.alphabet) + ';'
-                       + strategy + ';'
-                       + guess + ';' + str(common) + '\n')
-
-    def record_p2_state(self, p2, game, strategy, guess, common):
-        self.gam.write(str(p2.alphabet) + ';'
+    def record_player_state(self, player, game, strategy, guess, common):
+        alphabetStr = "{"
+        for letter in player.alphabet:
+            alphabetStr += "'%s': [%s, %s], "%(letter, player.alphabet[letter][0], player.alphabet[letter][1])
+            if letter != 'z':
+                alphabetStr += ", "
+        alphabetStr+= "}"
+        self.gam.write(str(alphabetStr) + ';'
                        + strategy + ';'
                        + guess + ';' + str(common) + '\n')
 
@@ -242,13 +245,13 @@ class Learning:
                 guess1 = p1.guess()
                 eval1 = p2.eval_guess(guess1[1])
                 p1.update_alphabet(guess1[1], eval1)
-                self.record_p1_state(p1, game, guess1[0], guess1[1], eval1)
+                self.record_player_state(p1, game, guess1[0], guess1[1], eval1)
                 if guess1[1] != p2.choice:
                     self.gam.write('--2' + str(turn) + '\n')
                     guess2 = p2.guess()
                     eval2 = p1.eval_guess(guess2[1])
                     p2.update_alphabet(guess2[1], eval2)
-                    self.record_p2_state(p2, game, guess2[0], guess2[1], eval2)
+                    self.record_player_state(p2, game, guess2[0], guess2[1], eval2)
                     if guess2[1] == p1.choice:
                         game_over = True
                         winner = "2"
