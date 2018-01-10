@@ -216,10 +216,12 @@ class Learning:
     def record_player_state(self, player, game, strategy, guess, common):
         alphabetStr = "{"
         for letter in player.alphabet:
-            alphabetStr += "'%s': [%s, %s]"%(letter, player.alphabet[letter][0], player.alphabet[letter][1])
+            alphabetStr += "'%s': [%s, %s]" % (letter,
+                                               player.alphabet[letter][0],
+                                               player.alphabet[letter][1])
             if letter != 'z':
                 alphabetStr += ", "
-        alphabetStr+= "}"
+        alphabetStr += "}"
         self.gam.write(str(alphabetStr) + ';'
                        + strategy + ';'
                        + guess + ';' + str(common) + '\n')
@@ -251,7 +253,8 @@ class Learning:
                     guess2 = p2.guess()
                     eval2 = p1.eval_guess(guess2[1])
                     p2.update_alphabet(guess2[1], eval2)
-                    self.record_player_state(p2, game, guess2[0], guess2[1], eval2)
+                    self.record_player_state(p2, game, guess2[0],
+                                             guess2[1], eval2)
                     if guess2[1] == p1.choice:
                         game_over = True
                         winner = "2"
