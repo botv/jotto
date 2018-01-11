@@ -93,7 +93,7 @@ class Computer:
         return [strat[0], guess]
 
     def update_possible(self):
-        # BUGGY
+        # Updates possible words
         knownLets = []
         knownNotLets = []
         for lett in self.alphabet:
