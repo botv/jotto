@@ -30,7 +30,7 @@ class Computer:
         self.last_guess = None
 
     def update_lists(self, guess, common):
-        # Removes OWN guess from list and appends it to
+        # Removes own guess from list and adds it to another list
         if len(set(guess)) == len(guess):
             self.norepeat.remove(guess)
         else:
