@@ -71,8 +71,13 @@ class Computer:
         print("No code here yet.")
 
     def strat3(self):
-        # What to do here?
-        print("No code here yet.")
+        info = self.find_known_letters_simple
+        possible = []
+        for word in possible:
+            if all(x in word for x in info[0]):
+                if not any(x in word for x in info[1]):
+                    possible.append(word)
+        return possible
 
     def eval_guess(self, guess):
         # Counts common letters between self.choice and guess
@@ -151,6 +156,18 @@ class Computer:
             return False
         return True
 
+    def find_known_letters_simple(self):
+        knownLets = []
+        tempKnownLets = []
+        knownNotLets = []
+        for lett in self.alphabet:
+            if self.alphabet[lett][1] == 1:
+                knownLets.append(lett)
+                tempKnownLets.append(lett)
+            elif self.alphabet[lett][1] == -1:
+                knownNotLets.append(lett)
+        return [knownLets, knownNotLets]
+
     def find_known_letters(self):
         knownLets = []
         tempKnownLets = []
@@ -225,6 +242,18 @@ class Learning:
         self.gam.write(str(alphabetStr) + ';'
                        + strategy + ';'
                        + guess + ';' + str(common) + '\n')
+
+    def parse(self, winner):
+        if winner == "1":
+            loser = "2"
+        else:
+            loser = "1"
+        game_file = filearr(self.gam)
+        for idx, line in enumerate(game_file):
+            if set(line.split(""))[0] == "--" + loser:
+                game_file.remove[idx]
+                game_file.remove[idx + 1]
+        return game_file
 
     def play(self, games):
         if games > 9:
