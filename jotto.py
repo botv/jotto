@@ -29,9 +29,9 @@ class Computer:
         self.possible = self.norepeat[:]
         self.last_guess = None
 
-    def update_lists(self, guess, common):
+    def update_lists(self, guess, common, player):
         # Removes OWN guess from list and appends it to
-        print "GUESS:", guess
+        print "%s GUESS:"%(player), guess
         if len(sorted(set(guess))) == len(guess):
             self.norepeat.remove(guess)
         else:
@@ -48,7 +48,7 @@ class Computer:
                 for letter in list(guess):
                     letters.append(letter)
             letters = sorted(set(letters))
-            if len(letters) == 26:
+            if len(letters) > 21:
                 guess = random.choice(self.for_guessing)
                 return guess
             run = True
@@ -68,7 +68,6 @@ class Computer:
                     ind = 0
             return guess
         else:
-            print "random"
             return random.choice(self.for_guessing)
 
     def strat2(self):
@@ -302,14 +301,14 @@ class Learning:
                 self.gam.write('--1' + str(turn) + '\n')
                 guess1 = p1.guess()
                 eval1 = p2.eval_guess(guess1[1])
-                p1.update_lists(guess1[1], eval1)
+                p1.update_lists(guess1[1], eval1, 'p1')
                 p1.update_alphabet(guess1[1], eval1)
                 self.record_player_state(p1, game, guess1[0], guess1[1], eval1)
                 if guess1[1] != p2.choice:
                     self.gam.write('--2' + str(turn) + '\n')
                     guess2 = p2.guess()
                     eval2 = p1.eval_guess(guess2[1])
-                    p2.update_lists(guess2[1], eval2)
+                    p2.update_lists(guess2[1], eval2, 'p2')
                     p2.update_alphabet(guess2[1], eval2)
                     self.record_player_state(p2, game, guess2[0],
                                              guess2[1], eval2)
