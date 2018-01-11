@@ -20,23 +20,25 @@ class Computer:
         self.alphabet = {}
         for letter in alphalist:
             self.alphabet[letter] = [0, 0, []]
-        self.words = filearr('words/words.txt')
-        self.for_guessing = self.words
-        self.norepeat = filearr('words/words_without_repeats.txt')
-        self.repeat = filearr('words/words_with_repeats.txt')
+        self.words = filearr('words/words.txt')[:]
+        self.for_guessing = self.words[:]
+        self.norepeat = filearr('words/words_without_repeats.txt')[:]
+        self.repeat = filearr('words/words_with_repeats.txt')[:]
         self.choice = random.choice(self.norepeat)
         self.own_guesses = {}
-        self.possible = self.norepeat
+        self.possible = self.norepeat[:]
         self.last_guess = None
 
     def update_lists(self, guess, common):
-        # Removes own guess from list and adds it to another list
-        if len(set(guess)) == len(guess):
+        # Removes OWN guess from list and appends it to
+        print "GUESS:", guess
+        if len(sorted(set(guess))) == len(guess):
             self.norepeat.remove(guess)
         else:
             self.repeat.remove(guess)
         self.for_guessing.remove(guess)
-        self.own_guesses[guess] = common
+        if guess in self.possible:
+            self.possible.remove(guess)
 
     def strat1(self):
         # Cover as many letters as possible
@@ -45,9 +47,10 @@ class Computer:
             for guess in self.own_guesses:
                 for letter in list(guess):
                     letters.append(letter)
-            letters = set(letters)
+            letters = sorted(set(letters))
             if len(letters) == 26:
-                letters.pop()
+                guess = random.choice(self.for_guessing)
+                return guess
             run = True
             ind = 0
             while run:
@@ -62,22 +65,46 @@ class Computer:
                         ind += 1
                 else:
                     letters.pop()
+                    ind = 0
             return guess
         else:
+            print "random"
             return random.choice(self.for_guessing)
 
     def strat2(self):
-        # Make the best possible guess
-        print("No code here yet.")
+        #Make the best possible guess
+        knownLets = []
+        for lett in self.alphabet:
+            if self.alphabet[lett][1] == 1:
+                knownLets.append(lett)
+        if len(knownLets) == 0:
+            guess = random.choice(self.possible)
+            return guess
+        ind = 0
+        run = True
+        while run:
+            if ind >= len(self.possible):
+                ind = 0
+                knownLets.pop()
+            word = self.possible[ind]
+            if all(x in word for x in knownLets):
+                guess = word
+                run = False
+            elif len(knownLets) == 0:
+                run = False
+            else:
+                ind += 1
+        if guess:
+            return guess
+        else:
+            print """There was an error in your evaluation of guesses.
+                     The letters you have comfirmed as true and false
+                     cannot be correct for any 5 letter word with
+                     letters that do not repeat."""
 
     def strat3(self):
-        info = self.find_known_letters_simple
-        possible = []
-        for word in possible:
-            if all(x in word for x in info[0]):
-                if not any(x in word for x in info[1]):
-                    possible.append(word)
-        return possible
+        # What to do here?
+        print("No code here yet.")
 
     def eval_guess(self, guess):
         # Counts common letters between self.choice and guess
@@ -88,8 +115,8 @@ class Computer:
 
     def guess(self):
         # Chooses a strategy with weighted probabilities
-        prob1 = 1
-        prob2 = 0
+        prob1 = 0.5
+        prob2 = 0.5
         prob3 = 0
         strat = np.random.choice(['strat1', 'strat2', 'strat3'], 1,
                                  p=[prob1, prob2, prob3])
@@ -97,8 +124,15 @@ class Computer:
         self.last_guess = guess
         return [strat[0], guess]
 
+    def test_guess(self, turn):
+        #temporary guess function for testing
+        if turn < 21:
+            return ['strat1', self.strat1()]
+        else:
+            return ['strat2', self.strat2()]
+
     def update_possible(self):
-        # Updates possible words
+        # Updates list of possible words
         knownLets = []
         knownNotLets = []
         for lett in self.alphabet:
@@ -107,6 +141,7 @@ class Computer:
             elif self.alphabet[lett][1] == -1:
                 knownNotLets.append(lett)
         ind = 0
+        changed = False
         while ind < len(self.possible):
             word = self.possible[ind]
             knownLetsInd = 0
@@ -117,6 +152,7 @@ class Computer:
                     self.possible.remove(word)
                     ind -= 1
                     wordRemoved = True
+                    changed = True
                 knownLetsInd += 1
             knownNotLetsInd = 0
             while knownNotLetsInd < len(knownNotLets) and not wordRemoved:
@@ -125,10 +161,14 @@ class Computer:
                     self.possible.remove(word)
                     ind -= 1
                     wordRemoved = True
+                    changed = True
                 knownNotLetsInd += 1
             ind += 1
+        return changed
 
     def eliminate_letter(self, let):
+        #Returns False if the given letter cannot be in the words
+        #Returns True if nothing can be proven about the letter
         letter = self.alphabet[let]
         if letter[1] == -1:
             return False
@@ -156,19 +196,10 @@ class Computer:
             return False
         return True
 
-    def find_known_letters_simple(self):
-        knownLets = []
-        tempKnownLets = []
-        knownNotLets = []
-        for lett in self.alphabet:
-            if self.alphabet[lett][1] == 1:
-                knownLets.append(lett)
-                tempKnownLets.append(lett)
-            elif self.alphabet[lett][1] == -1:
-                knownNotLets.append(lett)
-        return [knownLets, knownNotLets]
-
     def find_known_letters(self):
+        #Returns a list of known letters and finds known letters
+        #Updates self.alphabet to have all known letters marked
+        #Returns False if it cannot find any new letters
         knownLets = []
         tempKnownLets = []
         knownNotLets = []
@@ -178,16 +209,21 @@ class Computer:
                 tempKnownLets.append(lett)
             elif self.alphabet[lett][1] == -1:
                 knownNotLets.append(lett)
+        if len(knownNotLets) == 21 and len(knownLets) != 5:
+            for lett in self.alphabet:
+                if lett not in knownNotLets:
+                    self.alphabet[lett][1] = 1
+                    knownLets.append(lett)
         for guess in self.own_guesses:
             commonLetsInGuess = self.own_guesses[guess]
             unknownLetsInGuess = 0
-            for lett in guess:
+            for lett in sorted(set(guess)):
                 if lett in knownLets:
                     commonLetsInGuess -= 1
                 if self.alphabet[lett][1] == 0:
                     unknownLetsInGuess += 1
             if commonLetsInGuess == unknownLetsInGuess:
-                for lett in guess:
+                for lett in sorted(set(guess)):
                     if self.alphabet[lett][1] == 0:
                         knownLets.append(lett)
                         self.alphabet[lett][1] = 1
@@ -206,7 +242,9 @@ class Computer:
             self.alphabet[letter][0] += 1
         stillFinding = True
         stillEliminating = True
-        while stillFinding or stillEliminating:
+        stillUpdatingPossible = True
+        while stillFinding or stillEliminating or stillUpdatingPossible:
+            stillUpdatingPossible = self.update_possible()
             find_known_letters = self.find_known_letters()
             if find_known_letters is False:
                 stillFinding = False
@@ -252,6 +290,7 @@ class Learning:
         game = 1
         start_time = time.time()
         while game <= games:
+            pT = Computer()
             p1 = Computer()
             p2 = Computer()
             if game != 1:
@@ -263,19 +302,23 @@ class Learning:
                 self.gam.write('--1' + str(turn) + '\n')
                 guess1 = p1.guess()
                 eval1 = p2.eval_guess(guess1[1])
+                p1.update_lists(guess1[1], eval1)
                 p1.update_alphabet(guess1[1], eval1)
                 self.record_player_state(p1, game, guess1[0], guess1[1], eval1)
                 if guess1[1] != p2.choice:
                     self.gam.write('--2' + str(turn) + '\n')
                     guess2 = p2.guess()
                     eval2 = p1.eval_guess(guess2[1])
+                    p2.update_lists(guess2[1], eval2)
                     p2.update_alphabet(guess2[1], eval2)
                     self.record_player_state(p2, game, guess2[0],
                                              guess2[1], eval2)
                     if guess2[1] == p1.choice:
+                        print "p2 wins"
                         game_over = True
                         winner = "2"
                 else:
+                    print "p1 wins"
                     game_over = True
                     winner = "1"
                 turn += 1
