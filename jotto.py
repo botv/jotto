@@ -243,18 +243,6 @@ class Learning:
                        + strategy + ';'
                        + guess + ';' + str(common) + '\n')
 
-    def parse(self, winner):
-        if winner == "1":
-            loser = "2"
-        else:
-            loser = "1"
-        game_file = filearr(self.gam)
-        for idx, line in enumerate(game_file):
-            if set(line.split(""))[0] == "--" + loser:
-                game_file.remove[idx]
-                game_file.remove[idx + 1]
-        return game_file
-
     def play(self, games):
         if games > 9:
             games = 9
