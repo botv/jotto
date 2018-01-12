@@ -263,7 +263,7 @@ class Learning:
     def __init__(self):
         self.sessions = open('states/sessions.txt', 'r+')
         self.time_file = open('states/turntime.txt', 'a')
-        self.states_file = open('states/states.txt', 'r+')
+        self.states_file = open('states/states.txt', 'a+')
         self.sess_id = int(self.sessions.readline()) + 1
         self.gam = open('states/games/sess' + str(self.sess_id) + '.txt', 'w+')
         self.data = 'states/games/sess' + str(self.sess_id) + '.txt'
