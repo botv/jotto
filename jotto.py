@@ -5,6 +5,7 @@ import random
 import string
 import time
 import numpy as np
+import ast
 # import tensorflow as tf
 # import os
 
@@ -290,7 +291,7 @@ class Learning:
             datap = list(line.split(";"))
             lettersKnown = 0
             lettersNot = 0
-            alpha = eval(datap[2])
+            alpha = ast.literal_eval(datap[2])
             for lett in alpha:
                 if alpha[lett][1] == -1:
                     lettersNot += 1
