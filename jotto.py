@@ -31,7 +31,7 @@ class Computer:
 
     def update_lists(self, guess, common, player):
         # Removes OWN guess from list and appends it to
-        print "%s GUESS:"%(player), guess
+        print "%s GUESS:" % (player), guess
         if len(sorted(set(guess))) == len(guess):
             self.norepeat.remove(guess)
         else:
@@ -71,7 +71,7 @@ class Computer:
             return random.choice(self.for_guessing)
 
     def strat2(self):
-        #Make the best possible guess
+        # Make the best possible guess
         knownLets = []
         for lett in self.alphabet:
             if self.alphabet[lett][1] == 1:
@@ -124,7 +124,7 @@ class Computer:
         return [strat[0], guess]
 
     def test_guess(self, turn):
-        #temporary guess function for testing
+        # Temporary guess function for testing
         if turn < 21:
             return ['strat1', self.strat1()]
         else:
@@ -166,8 +166,8 @@ class Computer:
         return changed
 
     def eliminate_letter(self, let):
-        #Returns False if the given letter cannot be in the words
-        #Returns True if nothing can be proven about the letter
+        # Returns False if the given letter cannot be in the words
+        # Returns True if nothing can be proven about the letter
         letter = self.alphabet[let]
         if letter[1] == -1:
             return False
@@ -196,9 +196,9 @@ class Computer:
         return True
 
     def find_known_letters(self):
-        #Returns a list of known letters and finds known letters
-        #Updates self.alphabet to have all known letters marked
-        #Returns False if it cannot find any new letters
+        # Returns a list of known letters and finds known letters
+        # Updates self.alphabet to have all known letters marked
+        # Returns False if it cannot find any new letters
         knownLets = []
         tempKnownLets = []
         knownNotLets = []
@@ -263,9 +263,9 @@ class Learning:
         self.sessions = open('states/sessions.txt', 'r+')
         self.time_file = open('states/turntime.txt', 'a')
         self.states_file = open('states/states.txt', 'r+')
-        self.states_list_unparsed = filearr('states/states.txt')
         self.sess_id = int(self.sessions.readline()) + 1
         self.gam = open('states/games/sess' + str(self.sess_id) + '.txt', 'w+')
+        self.data = 'states/games/sess' + str(self.sess_id) + '.txt'
 
     def record_player_state(self, player, game, strategy, guess, common):
         alphabetStr = "{"
@@ -280,6 +280,26 @@ class Learning:
                        + strategy + ';'
                        + guess + ';' + str(common) + '\n')
 
+    def parser(self, winner):
+        data = filearr(self.data)
+        for line in data:
+            point = list(line.split(";"))
+            if point[0] != winner:
+                data.remove(line)
+        for line in data:
+            datap = list(line.split(";"))
+            lettersKnown = 0
+            lettersNot = 0
+            alpha = eval(datap[2])
+            for lett in alpha:
+                if alpha[lett][1] == -1:
+                    lettersNot += 1
+                elif alpha[lett][1] == 1:
+                    lettersKnown += 1
+            self.states_file.write(datap[1] + ";" + str(lettersKnown)
+                                   + ";" + str(lettersNot) + ";"
+                                   + datap[3] + ";\n")
+
     def play(self, games):
         if games > 9:
             games = 9
@@ -289,7 +309,6 @@ class Learning:
         game = 1
         start_time = time.time()
         while game <= games:
-            pT = Computer()
             p1 = Computer()
             p2 = Computer()
             if game != 1:
@@ -298,14 +317,14 @@ class Learning:
             winner = None
             turn = 1
             while not game_over:
-                self.gam.write('--1' + str(turn) + '\n')
+                self.gam.write('1;' + str(turn) + ';')
                 guess1 = p1.guess()
                 eval1 = p2.eval_guess(guess1[1])
                 p1.update_lists(guess1[1], eval1, 'p1')
                 p1.update_alphabet(guess1[1], eval1)
                 self.record_player_state(p1, game, guess1[0], guess1[1], eval1)
                 if guess1[1] != p2.choice:
-                    self.gam.write('--2' + str(turn) + '\n')
+                    self.gam.write('2;' + str(turn) + ';')
                     guess2 = p2.guess()
                     eval2 = p1.eval_guess(guess2[1])
                     p2.update_lists(guess2[1], eval2, 'p2')
@@ -327,6 +346,7 @@ class Learning:
                                  + ":" + str(turn - 1) + ":"
                                  + str(int((turn - 1) / elapsed))
                                  + ":" + winner + "\n")
+            self.parser(winner)
 
 
 def main():
