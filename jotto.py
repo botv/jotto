@@ -131,6 +131,12 @@ class Computer:
         else:
             return ['strat2', self.strat2()]
 
+    def guess_complex(self, current_state, states_file):
+        # In development
+        states_arr = filearr(states_file).split(";")
+        for state in states_arr:
+            state = state.split(";")
+
     def update_possible(self):
         # Updates list of possible words
         knownLets = []
