@@ -6,8 +6,8 @@ import string
 import time
 import numpy as np
 import ast
+import os
 # import tensorflow as tf
-# import os
 
 
 def filearr(file):
@@ -272,14 +272,15 @@ class Learning:
         self.states_file = open('states/states.txt', 'a+')
         self.sess_id = int(self.sessions.readline()) + 1
         self.gam = open('states/games/sess' + str(self.sess_id) + '.txt', 'w+')
+        self.gam_string = 'states/games/sess' + str(self.sess_id) + '.txt'
         self.data = 'states/games/sess' + str(self.sess_id) + '.txt'
 
     def record_player_state(self, player, game, strategy, guess, common):
         alphabetStr = "{"
         for letter in player.alphabet:
-            alphabetStr += "'%s': [%s, %s]" % (letter,
-                                               player.alphabet[letter][0],
-                                               player.alphabet[letter][1])
+            alphabetStr += "'%s'=> [%s, %s]" % (letter,
+                                                player.alphabet[letter][0],
+                                                player.alphabet[letter][1])
             if letter != 'z':
                 alphabetStr += ", "
         alphabetStr += "}"
@@ -287,7 +288,17 @@ class Learning:
                        + strategy + ';'
                        + guess + ';' + str(common) + '\n')
 
-    def parser(self, winner):
+    def record_player_state_new(self, player, game, strategy, guess, common):
+        alphaTemp = str(player.alphabet)
+        alphaTemp = alphaTemp.replace(':', '=>')
+        os.system("ruby writer.rb %s %s %s %s %s %s" % (alphaTemp,
+                                                        game,
+                                                        strategy,
+                                                        guess,
+                                                        common,
+                                                        self.gam_string))
+
+    def bad_parser(self, winner, file):
         data = filearr(self.data)
         for line in data:
             point = list(line.split(";"))
@@ -306,6 +317,9 @@ class Learning:
             self.states_file.write(datap[1] + ";" + str(lettersKnown)
                                    + ";" + str(lettersNot) + ";"
                                    + datap[3] + ";\n")
+
+    def parser(self, winner):
+        os.system("ruby parser.rb %s %s" % (winner, self.gam_string))
 
     def play(self, games):
         if games > 9:
