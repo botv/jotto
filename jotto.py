@@ -103,8 +103,38 @@ class Computer:
                      letters that do not repeat."""
 
     def strat3(self):
-        # What to do here?
-        print("No code here yet.")
+        # Make a guess to find information on a letter
+        somehowKnownLetters = []
+        for guess in self.own_guesses:
+            for lett in sorted(set(guess)):
+                if self.alphabet[lett][1] !=0:
+                    somehowKnownLetters.append(lett)
+        if len(somehowKnownLetters) == 0:
+            return random.choice(self.for_guessing)
+        otherLetsRequired = 5 - len(somehowKnownLetters)
+        if otherLetsRequired < 1:
+            otherLetsRequired = 1
+        ind = 0
+        run = True
+        while run:
+            if ind >= len(self.for_guessing):
+                ind = 0
+                otherLetsRequired += 1
+            if otherLetsRequired == 5:
+                return random.choice(self.for_guessing)
+                run = False
+            word = self.for_guessing[ind]
+            otherCount = 0
+            for lett in word:
+                if lett not in somehowKnownLetters:
+                    otherCount += 1
+            if otherCount == otherLetsRequired:
+                return word
+                run = False
+            ind += 1
+
+
+
 
     def eval_guess(self, guess):
         # Counts common letters between self.choice and guess
@@ -274,29 +304,24 @@ class Learning:
         self.gam = open('states/games/sess' + str(self.sess_id) + '.txt', 'w+')
         self.gam_string = 'states/games/sess' + str(self.sess_id) + '.txt'
         self.data = 'states/games/sess' + str(self.sess_id) + '.txt'
+        self.game_states = ""
 
-    def record_player_state(self, player, game, strategy, guess, common):
-        alphabetStr = "{"
-        for letter in player.alphabet:
-            alphabetStr += "'%s'=> [%s, %s]" % (letter,
-                                                player.alphabet[letter][0],
-                                                player.alphabet[letter][1])
-            if letter != 'z':
-                alphabetStr += ", "
-        alphabetStr += "}"
-        self.gam.write(str(alphabetStr) + ';'
-                       + strategy + ';'
-                       + guess + ';' + str(common) + '\n')
+    def record_player_state(self, player, game, strategy, guess, common, player_name, turn):
+        alphabetStr = str(player.alphabet).replace(':', '=>')
+        self.game_states += (player_name + ";" + turn + ";" + str(alphabetStr) + ';' + strategy + ';' + guess + ';' + str(common) + '\n')
 
-    def record_player_state_new(self, player, game, strategy, guess, common):
-        alphaTemp = str(player.alphabet)
-        alphaTemp = alphaTemp.replace(':', '=>')
-        os.system("ruby writer.rb %s %s %s %s %s %s" % (alphaTemp,
-                                                        game,
-                                                        strategy,
-                                                        guess,
-                                                        common,
-                                                        self.gam_string))
+    def save_game(self):
+        os.system("ruby writer.rb \"%s\" \"%s\"" % (self.game_states, self.gam_string))
+        #alphaTemp = str(player.alphabet)
+        #alphaTemp = alphaTemp.replace(':', '=>')
+        #os.system("ruby writer.rb \"%s\" %s %s %s %s \"%s\" %s %s" % (alphaTemp,
+                                                        #game,
+                                                        #strategy,
+                                                        #guess,
+                                                        #common,
+                                                        #self.gam_string,
+                                                        #player_name,
+                                                        #turn))
 
     def bad_parser(self, winner, file):
         data = filearr(self.data)
@@ -332,26 +357,25 @@ class Learning:
         while game <= games:
             p1 = Computer()
             p2 = Computer()
+            self.save_game()
+            self.game_states = ""
             if game != 1:
                 self.gam.write("=")
             game_over = False
             winner = None
             turn = 1
             while not game_over:
-                self.gam.write('1;' + str(turn) + ';')
                 guess1 = p1.guess()
                 eval1 = p2.eval_guess(guess1[1])
                 p1.update_lists(guess1[1], eval1, 'p1')
                 p1.update_alphabet(guess1[1], eval1)
-                self.record_player_state(p1, game, guess1[0], guess1[1], eval1)
+                self.record_player_state(p1, game, guess1[0], guess1[1], eval1, '1', str(turn))
                 if guess1[1] != p2.choice:
-                    self.gam.write('2;' + str(turn) + ';')
                     guess2 = p2.guess()
                     eval2 = p1.eval_guess(guess2[1])
                     p2.update_lists(guess2[1], eval2, 'p2')
                     p2.update_alphabet(guess2[1], eval2)
-                    self.record_player_state(p2, game, guess2[0],
-                                             guess2[1], eval2)
+                    self.record_player_state(p2, game, guess2[0], guess2[1], eval2, '2', str(turn))
                     if guess2[1] == p1.choice:
                         print "p2 wins"
                         game_over = True
@@ -361,6 +385,8 @@ class Learning:
                     game_over = True
                     winner = "1"
                 turn += 1
+            self.save_game()
+            self.game_states = ""
             game += 1
             elapsed = time.time() - start_time
             self.time_file.write(str(round(elapsed, 3))
