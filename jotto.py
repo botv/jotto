@@ -28,7 +28,6 @@ class Computer:
         self.choice = random.choice(self.norepeat)
         self.own_guesses = {}
         self.possible = self.norepeat[:]
-        self.last_guess = None
 
     def update_lists(self, guess, common, player):
         # Removes OWN guess from list and appends it to
@@ -148,7 +147,6 @@ class Computer:
         strat = np.random.choice(['strat1', 'strat2', 'strat3'], 1,
                                  p=[prob1, prob2, prob3])
         guess = getattr(self, strat[0])()
-        self.last_guess = guess
         return [strat[0], guess]
 
     def test_guess(self, turn):
@@ -161,8 +159,25 @@ class Computer:
     def guess_complex(self, current_state, states_file):
         # In development
         states_arr = filearr(states_file).split(";")
+        weights = []
         for state in states_arr:
             state = state.split(";")
+            strat_choice = state.pop(-1)
+            # scaled_success = state.pop(-2)
+            if state == current_state:
+                weights.append(strat_choice)
+        part_weight = 1 / float(len(weights))
+        prob1 = part_weight * (weights.count('strat1'))
+        prob2 = part_weight * (weights.count('strat2'))
+        prob3 = part_weight * (weights.count('strat3'))
+        if (prob1 + prob2 + prob3) != 1:
+            prob1 = 1 / 3.0
+            prob2 = 1 / 3.0
+            prob3 = 1 / 3.0
+        strat = np.random.choice(['strat1', 'strat2', 'strat3'], 1,
+                                 p=[prob1, prob2, prob3])
+        guess = getattr(self, strat[0])()
+        return [strat[0], guess]
 
     def update_possible(self):
         # Updates list of possible words
