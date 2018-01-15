@@ -107,7 +107,7 @@ class Computer:
         somehowKnownLetters = []
         for guess in self.own_guesses:
             for lett in sorted(set(guess)):
-                if self.alphabet[lett][1] !=0:
+                if self.alphabet[lett][1] != 0:
                     somehowKnownLetters.append(lett)
         if len(somehowKnownLetters) == 0:
             return random.choice(self.for_guessing)
@@ -133,9 +133,6 @@ class Computer:
                 run = False
             ind += 1
 
-
-
-
     def eval_guess(self, guess):
         # Counts common letters between self.choice and guess
         common = 0
@@ -145,9 +142,9 @@ class Computer:
 
     def guess(self):
         # Chooses a strategy with weighted probabilities
-        prob1 = 0.5
-        prob2 = 0.5
-        prob3 = 0
+        prob1 = 1 / 3.0
+        prob2 = 1 / 3.0
+        prob3 = 1 / 3.0
         strat = np.random.choice(['strat1', 'strat2', 'strat3'], 1,
                                  p=[prob1, prob2, prob3])
         guess = getattr(self, strat[0])()
@@ -306,22 +303,16 @@ class Learning:
         self.data = 'states/games/sess' + str(self.sess_id) + '.txt'
         self.game_states = ""
 
-    def record_player_state(self, player, game, strategy, guess, common, player_name, turn):
+    def record_player_state(self, player, game, strategy, guess, common,
+                            player_name, turn):
         alphabetStr = str(player.alphabet).replace(':', '=>')
-        self.game_states += (player_name + ";" + turn + ";" + str(alphabetStr) + ';' + strategy + ';' + guess + ';' + str(common) + '\n')
+        self.game_states += (player_name + ";" + turn + ";" + str(alphabetStr)
+                             + ';' + strategy + ';' + guess + ';'
+                             + str(common) + '\n')
 
     def save_game(self):
-        os.system("ruby writer.rb \"%s\" \"%s\"" % (self.game_states, self.gam_string))
-        #alphaTemp = str(player.alphabet)
-        #alphaTemp = alphaTemp.replace(':', '=>')
-        #os.system("ruby writer.rb \"%s\" %s %s %s %s \"%s\" %s %s" % (alphaTemp,
-                                                        #game,
-                                                        #strategy,
-                                                        #guess,
-                                                        #common,
-                                                        #self.gam_string,
-                                                        #player_name,
-                                                        #turn))
+        os.system("ruby writer.rb \"%s\" \"%s\"" % (self.game_states,
+                                                    self.gam_string))
 
     def bad_parser(self, winner, file):
         data = filearr(self.data)
@@ -369,13 +360,15 @@ class Learning:
                 eval1 = p2.eval_guess(guess1[1])
                 p1.update_lists(guess1[1], eval1, 'p1')
                 p1.update_alphabet(guess1[1], eval1)
-                self.record_player_state(p1, game, guess1[0], guess1[1], eval1, '1', str(turn))
+                self.record_player_state(p1, game, guess1[0], guess1[1],
+                                         eval1, '1', str(turn))
                 if guess1[1] != p2.choice:
                     guess2 = p2.guess()
                     eval2 = p1.eval_guess(guess2[1])
                     p2.update_lists(guess2[1], eval2, 'p2')
                     p2.update_alphabet(guess2[1], eval2)
-                    self.record_player_state(p2, game, guess2[0], guess2[1], eval2, '2', str(turn))
+                    self.record_player_state(p2, game, guess2[0], guess2[1],
+                                             eval2, '2', str(turn))
                     if guess2[1] == p1.choice:
                         print "p2 wins"
                         game_over = True
