@@ -3,7 +3,7 @@ def read(file)
   File.open(file).each do |line|
     words.push(line[0..line.length()-2])
   end
-  return words[0..words.length-2]
+  return words[0..words.length-1]
 end
 
 def parser(winner=ARGV[0])
