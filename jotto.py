@@ -36,7 +36,6 @@ class Computer:
 
     def update_lists(self, guess, common, player):
         # Fixes stuff
-        print "%s GUESS:" % (player), guess
         if len(sorted(set(guess))) == len(guess):
             self.norepeat.remove(guess)
         else:
@@ -53,7 +52,7 @@ class Computer:
                 for letter in list(guess):
                     letters.append(letter)
             letters = sorted(set(letters))
-            if len(letters) > 21:
+            if len(letters) > 20:
                 guess = random.choice(self.for_guessing)
             run = True
             ind = 0
@@ -188,10 +187,10 @@ class Computer:
             if state == current_state:
                 weights.append(strat_choice)
         if len(weights) != 0:
-            part_weight = 0.40 / float(len(weights))
-            prob1 = 0.20 + (part_weight * (weights.count('strat1')))
-            prob2 = 0.20 + (part_weight * (weights.count('strat2')))
-            prob3 = 0.20 + (part_weight * (weights.count('strat3')))
+            part_weight = 0.25 / float(len(weights))
+            prob1 = 0.25 + (part_weight * (weights.count('strat1')))
+            prob2 = 0.25 + (part_weight * (weights.count('strat2')))
+            prob3 = 0.25 + (part_weight * (weights.count('strat3')))
         else:
             prob1 = 1 / 3.0
             prob2 = 1 / 3.0
@@ -250,6 +249,8 @@ class Computer:
                 knownLets.append(lett)
         if let in knownLets:
             return True
+        if len(knownLets) == 5:
+            return False
         for guess in letter[2]:
             unknownLetsInGuess = self.own_guesses[guess]
             for lett in knownLets:
@@ -448,29 +449,68 @@ class Learning:
         last_avg = np.average(last_hun)
         print(str(first_avg) + "::" + str(last_avg))
 
-#    def play_human(self):
-#        comp = Computer()
-#        game_over = False
-#        winner = None
-#        os.system("clear")
-#        print("The game is about to begin. Good luck...")
-#        time.sleep(1)
-#        os.system("clear")
-#        print("First, choose your word.")
-#        raw_input("Press Enter to continue.")
-#        os.system("clear")
-#        while not game_over:
-#            guess1 = raw_input("Enter your guess: ")
-#            guessIsGood = False
-#            if len(guess1):
-#                guessIsGood = True
-#                if len(guess1) == 5:
-#                    eval1 = comp.eval_guess(guess1)
-#                    comp.update_lists(guess1[1], eval1, 'comp')
-#                    comp.update_alphabet(guess1[1], eval1)
-#                    if guess1 != comp.choice:
-#                        guess2 = comp.guess()
-#                        eval2 = raw_input("Evaluate my guess: ")
+    def get_guess(self):
+        isGood = False
+        alphabet = 'abcdefghijklmnopqrstuvwxyz'
+        while not isGood:
+            word = raw_input("Enter a valid guess (5 letters, "
+                             + "no non-letter characters): ")
+            isGood = True
+            word = word.lower()
+            if len(word) != 5:
+                isGood = False
+            for lett in word:
+                if lett not in alphabet:
+                    isGood = False
+        return word
+
+    def get_eval(self):
+        isGood = False
+        nums = ['0','1','2','3','4','5']
+        while not isGood:
+            evaluation = raw_input("Evaluate my guess (an integer 0-5): ")
+            isGood = True
+            if evaluation not in nums:
+                if evaluation.lower() == 'true':
+                    return "Same"
+                isGood = False
+        return int(evaluation)
+
+    def play_human(self):
+        comp = Computer()
+        game_over = False
+        os.system("clear")
+        print("The game is about to begin. Good luck...")
+        time.sleep(1)
+        os.system("clear")
+        print("First, choose your word.")
+        raw_input("Press [ENTER] once you have chosen a word.")
+        os.system("clear")
+        turn = 0
+        while not game_over:
+            turn += 1
+            guess1 = self.get_guess()
+            eval1 = comp.eval_guess(guess1)
+            print "My evaluation of your guess: %s" % (eval1)
+            if guess1 != comp.choice:
+                guess2 = comp.guess()
+                print "My guess is: %s" % (guess2[1])
+                if turn == 1:
+                    print("When you evaluate a guess, only count repeated "
+                          + "letters once. If the guess is the same as your "
+                          + "word, reply 'true'. "
+                          + "\nCAUTION: If your evaluation is incorrect, "
+                          + "the program might break.")
+                eval2 = self.get_eval()
+                if eval2 == "Same":
+                    print "The computer won!"
+                    game_over = True
+                else:
+                    comp.update_lists(guess2[1], eval2, 'comp')
+                    comp.update_alphabet(guess2[1], eval2)
+            else:
+                print "You won!"
+                game_over = True
 
 
 def check_average():
@@ -487,13 +527,8 @@ def check_average():
 
 def main():
     game = Learning()
-    game.play(1)
+    game.play_human()
 
 
 if __name__ == "__main__":
-    i = 0
-    while i <= 1000:
-        main()
-        cleanup()
-        i += 1
-    check_average()
+    main()
