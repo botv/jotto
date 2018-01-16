@@ -20,6 +20,12 @@ def cleanup():
     os.system("rm states/games/*")
 
 
+def red(text):
+    return (u"\u001b[31m"
+            + text
+            + u"\u001b[0m")
+
+
 class Computer:
     def __init__(self):
         alphalist = list(string.ascii_lowercase)
@@ -330,7 +336,12 @@ class Computer:
                     self.alphabet[letter][1] = -1
                     stillEliminating = True
             if len(self.possible) == 0:
-                print "There are no remaining possible words."
+                os.system("clear.")
+                print(red("There are no remaining possible words."))
+                time.sleep(1)
+                print "You either cheated or are just an idiot."
+                time.sleep(1)
+                raw_input("Press [ENTER] to leave the game.")
                 quit()
 
 
@@ -470,19 +481,32 @@ class Learning:
                     isGood = False
         return word
 
-    def get_eval(self):
+    def get_eval(self, guess):
         isGood = False
         nums = ['0', '1', '2', '3', '4', '5']
+
         while not isGood:
+            print("My guess is: %s" % (guess))
             evaluation = raw_input("Evaluate my guess (an integer 0-5): ")
             isGood = True
             if evaluation not in nums:
                 if evaluation.lower() == 'true':
                     return "Same"
                 isGood = False
+                os.system("clear")
+                print(red("Your evaluation is impossible."))
+                raw_input("Press [ENTER] to go back to guess evaluation.")
+                os.system("clear")
+            elif int(evaluation) > len(sorted(set(guess))):
+                isGood = False
+                os.system("clear")
+                print(red("Your evaluation is impossible."))
+                raw_input("Press [ENTER] to go back to guess evaluation.")
+                os.system("clear")
         return int(evaluation)
 
     def play_human(self):
+        # Play against a human
         comp = Computer()
         game_over = False
         os.system("clear")
@@ -498,17 +522,22 @@ class Learning:
             guess1 = self.get_guess()
             eval1 = comp.eval_guess(guess1)
             print "My evaluation of your guess: %s" % (eval1)
+            raw_input("Press [ENTER] to continue.")
+            os.system("clear")
             if guess1 != comp.choice:
                 guess2 = comp.guess()
-                print "My guess is: %s" % (guess2[1])
                 if turn == 1:
-                    print("When you evaluate a guess, only count repeated "
-                          + "letters once. If the guess is the same as your "
-                          + "word, reply 'true'. "
-                          + "\nCAUTION: If your evaluation is incorrect, "
-                          + "the program might break.")
-                eval2 = self.get_eval()
-                print comp.possible
+                    print(red("NOTE: When you evaluate a guess, "
+                              + "only count repeated "
+                              + "letters once. If the guess is the same as "
+                              + "your word, reply 'true'. "))
+                    print(red("CAUTION: If your evaluation is incorrect, "
+                          + "the program might break."))
+                    raw_input("Press [ENTER] to continue.")
+                    os.system("clear")
+                eval2 = self.get_eval(guess2[1])
+
+                # print comp.possible
                 if eval2 == "Same":
                     print "The computer won!"
                     game_over = True
