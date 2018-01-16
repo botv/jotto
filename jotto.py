@@ -475,6 +475,7 @@ class Learning:
     def get_guess(self):
         isGood = False
         alphabet = 'abcdefghijklmnopqrstuvwxyz'
+        wordlist = filearr('words/words.txt')[:]
         while not isGood:
             word = raw_input("Enter a valid guess (5 letters, "
                              + "no non-letter characters): ")
@@ -485,6 +486,13 @@ class Learning:
             for lett in word:
                 if lett not in alphabet:
                     isGood = False
+            if word not in wordlist:
+                isGood = False
+            if not isGood:
+                os.system("clear")
+                print(red("Your guess is invalid."))
+                raw_input("Press [ENTER] to go back to guessing.")
+                os.system("clear")
         return word
 
     def get_eval(self, guess):
@@ -500,13 +508,13 @@ class Learning:
                     return "Same"
                 isGood = False
                 os.system("clear")
-                print(red("Your evaluation is impossible."))
+                print(red("Your evaluation is invalid."))
                 raw_input("Press [ENTER] to go back to guess evaluation.")
                 os.system("clear")
             elif int(evaluation) > len(sorted(set(guess))):
                 isGood = False
                 os.system("clear")
-                print(red("Your evaluation is impossible."))
+                print(red("Your evaluation is invalid."))
                 raw_input("Press [ENTER] to go back to guess evaluation.")
                 os.system("clear")
         return int(evaluation)
@@ -542,15 +550,19 @@ class Learning:
                     raw_input("Press [ENTER] to continue.")
                     os.system("clear")
                 eval2 = self.get_eval(guess2[1])
+                os.system("clear")
 
                 # print comp.possible
                 if eval2 == "Same":
-                    print(green("The computer won!"))
+                    os.system("clear")
+                    print(green("I won!"))
+                    print(green("My word was " + comp.choice + "."))
                     game_over = True
                 else:
                     comp.update_lists(guess2[1], eval2, 'comp')
                     comp.update_alphabet(guess2[1], eval2)
             else:
+                os.system("clear")
                 print(green("You won!"))
                 print(green("I had %s words in my "
                       + "possible word list." % (comp.possible)))
@@ -570,9 +582,8 @@ def check_average():
 
 
 def main():
-    # game = Learning()
-    # game.play_human()
-    print(green("Hello"))
+    game = Learning()
+    game.play_human()
 
 
 if __name__ == "__main__":
