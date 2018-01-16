@@ -188,10 +188,10 @@ class Computer:
             if state == current_state:
                 weights.append(strat_choice)
         if len(weights) != 0:
-            part_weight = 1 / float(len(weights))
-            prob1 = part_weight * (weights.count('strat1'))
-            prob2 = part_weight * (weights.count('strat2'))
-            prob3 = part_weight * (weights.count('strat3'))
+            part_weight = 0.40 / float(len(weights))
+            prob1 = 0.20 + (part_weight * (weights.count('strat1')))
+            prob2 = 0.20 + (part_weight * (weights.count('strat2')))
+            prob3 = 0.20 + (part_weight * (weights.count('strat3')))
         else:
             prob1 = 1 / 3.0
             prob2 = 1 / 3.0
@@ -473,10 +473,27 @@ class Learning:
 #                        eval2 = raw_input("Evaluate my guess: ")
 
 
+def check_average():
+    timearr = filearr("states/turntime.txt")
+    times = []
+    for timea in timearr:
+        times.append(int(timea.split(":")[1]))
+    first_hun = times[0:99]
+    last_hun = times[-99:]
+    first_avg = np.average(first_hun)
+    last_avg = np.average(last_hun)
+    print(str(first_avg) + "::" + str(last_avg))
+
+
 def main():
     game = Learning()
     game.play(1)
 
 
 if __name__ == "__main__":
-    main()
+    i = 0
+    while i <= 1000:
+        main()
+        cleanup()
+        i += 1
+    check_average()
