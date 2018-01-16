@@ -54,6 +54,7 @@ class Computer:
             letters = sorted(set(letters))
             if len(letters) > 20:
                 guess = random.choice(self.for_guessing)
+                return guess
             run = True
             ind = 0
             while run:
@@ -296,8 +297,6 @@ class Computer:
                     if self.alphabet[lett][1] == 0:
                         knownLets.append(lett)
                         self.alphabet[lett][1] = 1
-        if len(self.possible) == 0:
-            print "There are no remaining possible words."
         if knownLets == tempKnownLets:
             return False
         else:
@@ -328,6 +327,9 @@ class Computer:
                         self.alphabet[letter][1] != -1):
                     self.alphabet[letter][1] = -1
                     stillEliminating = True
+            if len(self.possible) == 0:
+                print "There are no remaining possible words."
+                quit()
 
 
 class Learning:
@@ -468,7 +470,7 @@ class Learning:
 
     def get_eval(self):
         isGood = False
-        nums = ['0','1','2','3','4','5']
+        nums = ['0', '1', '2', '3', '4', '5']
         while not isGood:
             evaluation = raw_input("Evaluate my guess (an integer 0-5): ")
             isGood = True
