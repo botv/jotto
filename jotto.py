@@ -11,6 +11,7 @@ import os
 
 
 def filearr(file):
+    # Turn a folder into an array
     words = [line.rstrip('\n') for line in open(file)]
     return words
 
@@ -30,7 +31,7 @@ class Computer:
         self.possible = self.norepeat[:]
 
     def update_lists(self, guess, common, player):
-        # Removes OWN guess from list and appends it to
+        # Fixes stuff
         print "%s GUESS:" % (player), guess
         if len(sorted(set(guess))) == len(guess):
             self.norepeat.remove(guess)
@@ -108,23 +109,21 @@ class Computer:
     def strat3(self):
         # Make a guess to find information on a letter
         somehowKnownLetters = []
-        for guess in self.own_guesses:
-            for lett in sorted(set(guess)):
-                if self.alphabet[lett][1] != 0:
-                    somehowKnownLetters.append(lett)
+        for lett in self.alphabet:
+            if self.alphabet[lett][1] != 0:
+                somehowKnownLetters.append(lett)
         if len(somehowKnownLetters) == 0:
-            guess = random.choice(self.for_guessing)
-        otherLetsRequired = 5 - len(somehowKnownLetters)
-        if otherLetsRequired < 1:
-            otherLetsRequired = 1
+            return random.choice(self.for_guessing)
+        otherLetsRequired = 1
         ind = 0
         run = True
         while run:
+            print otherLetsRequired
             if ind >= len(self.for_guessing):
                 ind = 0
                 otherLetsRequired += 1
             if otherLetsRequired == 5:
-                guess = random.choice(self.for_guessing)
+                return random.choice(self.for_guessing)
                 run = False
             word = self.for_guessing[ind]
             otherCount = 0
@@ -132,16 +131,9 @@ class Computer:
                 if lett not in somehowKnownLetters:
                     otherCount += 1
             if otherCount == otherLetsRequired:
-                guess = word
+                return word
                 run = False
             ind += 1
-        if guess:
-            return guess
-        else:
-            print """There was an error in your evaluation of guesses.
-                     The letters you have comfirmed as true and false
-                     cannot be correct for any 5 letter word with
-                     letters that do not repeat."""
 
     def eval_guess(self, guess):
         # Counts common letters between self.choice and guess
@@ -168,7 +160,7 @@ class Computer:
             return ['strat2', self.strat2()]
 
     def guess_complex(self, current_state, states_file):
-        # In development
+        # A better guessing function
         states_arr = filearr(states_file).split(";")
         weights = []
         for state in states_arr:
@@ -256,9 +248,7 @@ class Computer:
         return True
 
     def find_known_letters(self):
-        # Returns a list of known letters and finds known letters
-        # Updates self.alphabet to have all known letters marked
-        # Returns False if it cannot find any new letters
+        # Returns a list of known letters or simply False
         knownLets = []
         tempKnownLets = []
         knownNotLets = []
@@ -329,12 +319,25 @@ class Learning:
         self.data = 'states/games/sess' + str(self.sess_id) + '.txt'
         self.game_states = ""
 
-    def record_player_state(self, player, game, strategy, guess, common,
-                            player_name, turn):
+    def record_player_state(self, player, game, strategy,
+                            guess, common, player_name, turn):
         alphabetStr = str(player.alphabet).replace(':', '=>')
-        self.game_states += (player_name + ";" + turn + ";" + str(alphabetStr)
-                             + ';' + strategy + ';' + guess + ';'
-                             + str(common) + '\n')
+        nowInfo = 0
+        for lett in player.alphabet:
+            if player.alphabet[lett][1] != 0:
+                nowInfo += 1
+        if turn != "1":
+            noInd = self.game_states.split("\n")
+            tempGameStates = noInd[:len(self.game_states.split("\n"))-1]
+            tempState = tempGameStates[len(tempGameStates)-2].split(";")
+            pastInfo = int(tempState[len(tempState)-3])
+            learnedInfo = nowInfo - pastInfo
+        else:
+            learnedInfo = nowInfo
+        self.game_states += (player_name + ";" + turn + ";" +
+                             str(alphabetStr) + ';' + strategy + ';' +
+                             guess + ';' + str(common) + ';' +
+                             str(nowInfo) + ';' + str(learnedInfo) + ';\n')
 
     def save_game(self):
         os.system("ruby writer.rb \"%s\" \"%s\"" % (self.game_states,
