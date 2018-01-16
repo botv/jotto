@@ -16,6 +16,10 @@ def filearr(file):
     return words
 
 
+def cleanup():
+    os.system("rm states/games/*")
+
+
 class Computer:
     def __init__(self):
         alphalist = list(string.ascii_lowercase)
@@ -158,21 +162,37 @@ class Computer:
         else:
             return ['strat2', self.strat2()]
 
-    def guess_complex(self, current_state):
+    def get_current_state(self, turn):
+        state = []
+        state.append(str(turn))
+        knownLets = 0
+        knownNotLets = 0
+        for lett in self.alphabet:
+            if self.alphabet[lett][1] == 1:
+                knownLets += 1
+            elif self.alphabet[lett][1] == -1:
+                knownNotLets += 1
+        state.append(str(knownLets))
+        state.append(str(knownNotLets))
+        return state
+
+    def guess_complex(self, current_state, turn):
         # A better guessing function
-        states_arr = filearr("states/states.txt").split(";")
+        states_arr = filearr("states/states.txt")
         weights = []
+        current_state = self.get_current_state(turn)
         for state in states_arr:
             state = state.split(";")
             strat_choice = state.pop(-1)
             # scaled_success = state.pop(-2)
             if state == current_state:
                 weights.append(strat_choice)
-        part_weight = 1 / float(len(weights))
-        prob1 = part_weight * (weights.count('strat1'))
-        prob2 = part_weight * (weights.count('strat2'))
-        prob3 = part_weight * (weights.count('strat3'))
-        if (prob1 + prob2 + prob3) != 1:
+        if len(weights) != 0:
+            part_weight = 1 / float(len(weights))
+            prob1 = part_weight * (weights.count('strat1'))
+            prob2 = part_weight * (weights.count('strat2'))
+            prob3 = part_weight * (weights.count('strat3'))
+        else:
             prob1 = 1 / 3.0
             prob2 = 1 / 3.0
             prob3 = 1 / 3.0
@@ -384,14 +404,15 @@ class Learning:
             winner = None
             turn = 1
             while not game_over:
-                guess1 = p1.guess_complex()
+                guess1 = p1.guess_complex(p1.get_current_state(turn), turn)
                 eval1 = p2.eval_guess(guess1[1])
                 p1.update_lists(guess1[1], eval1, 'p1')
                 p1.update_alphabet(guess1[1], eval1)
                 self.record_player_state(p1, game, guess1[0], guess1[1],
                                          eval1, '1', str(turn))
                 if guess1[1] != p2.choice:
-                    guess2 = p2.guess_complex()
+                    guess2 = p2.guess_complex(p2.get_current_state(turn),
+                                              turn)
                     eval2 = p1.eval_guess(guess2[1])
                     p2.update_lists(guess2[1], eval2, 'p2')
                     p2.update_alphabet(guess2[1], eval2)
@@ -415,6 +436,41 @@ class Learning:
                                  + str(int((turn - 1) / elapsed))
                                  + ":" + winner + "\n")
             self.parser(winner)
+
+    def get_average(self):
+        timearr = filearr(self.time_file)
+        times = []
+        for timea in timearr:
+            times.append(int(timea.split(":")[1]))
+        first_hun = times[0:99]
+        last_hun = times[-99:]
+        first_avg = np.average(first_hun)
+        last_avg = np.average(last_hun)
+        print(str(first_avg) + "::" + str(last_avg))
+
+#    def play_human(self):
+#        comp = Computer()
+#        game_over = False
+#        winner = None
+#        os.system("clear")
+#        print("The game is about to begin. Good luck...")
+#        time.sleep(1)
+#        os.system("clear")
+#        print("First, choose your word.")
+#        raw_input("Press Enter to continue.")
+#        os.system("clear")
+#        while not game_over:
+#            guess1 = raw_input("Enter your guess: ")
+#            guessIsGood = False
+#            if len(guess1):
+#                guessIsGood = True
+#                if len(guess1) == 5:
+#                    eval1 = comp.eval_guess(guess1)
+#                    comp.update_lists(guess1[1], eval1, 'comp')
+#                    comp.update_alphabet(guess1[1], eval1)
+#                    if guess1 != comp.choice:
+#                        guess2 = comp.guess()
+#                        eval2 = raw_input("Evaluate my guess: ")
 
 
 def main():
