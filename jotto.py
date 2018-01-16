@@ -556,17 +556,21 @@ class Learning:
                 if eval2 == "Same":
                     os.system("clear")
                     print(green("I won!"))
-                    print(green("My word was " + comp.choice + "."))
+                    print("My word was " + comp.choice + ".")
+                    raw_input("Press [ENTER] to leave the game.")
                     game_over = True
+                    os.system("clear")
                 else:
                     comp.update_lists(guess2[1], eval2, 'comp')
                     comp.update_alphabet(guess2[1], eval2)
             else:
                 os.system("clear")
                 print(green("You won!"))
-                print(green("I had %s words in my "
-                      + "possible word list." % (comp.possible)))
+                print("I had %s words in my "
+                      + "possible word list." % (comp.possible))
+                raw_input("Press [ENTER] to leave the game.")
                 game_over = True
+                os.system("clear")
 
 
 def check_average():
