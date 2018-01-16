@@ -546,7 +546,7 @@ class Learning:
                 # print comp.possible
                 if eval2 == "Same":
                     os.system("clear")
-                    print(green("I won!"))
+                    print(green("Ha! I beat you!"))
                     print("My word was " + comp.choice + ".")
                     raw_input("Press [ENTER] to leave the game.")
                     game_over = True
