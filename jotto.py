@@ -26,6 +26,12 @@ def red(text):
             + u"\u001b[0m")
 
 
+def green(text):
+    return (u"\u001b[32m"
+            + text
+            + u"\u001b[0m")
+
+
 class Computer:
     def __init__(self):
         alphalist = list(string.ascii_lowercase)
@@ -339,7 +345,7 @@ class Computer:
                 os.system("clear.")
                 print(red("There are no remaining possible words."))
                 time.sleep(1)
-                print "You either cheated or are just an idiot."
+                print(red("You either cheated or are just an idiot."))
                 time.sleep(1)
                 raw_input("Press [ENTER] to leave the game.")
                 quit()
@@ -539,13 +545,15 @@ class Learning:
 
                 # print comp.possible
                 if eval2 == "Same":
-                    print "The computer won!"
+                    print(green("The computer won!"))
                     game_over = True
                 else:
                     comp.update_lists(guess2[1], eval2, 'comp')
                     comp.update_alphabet(guess2[1], eval2)
             else:
-                print "You won!"
+                print(green("You won!"))
+                print(green("I had %s words in my "
+                      + "possible word list." % (comp.possible)))
                 game_over = True
 
 
@@ -562,8 +570,9 @@ def check_average():
 
 
 def main():
-    game = Learning()
-    game.play_human()
+    # game = Learning()
+    # game.play_human()
+    print(green("Hello"))
 
 
 if __name__ == "__main__":
