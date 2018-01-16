@@ -118,7 +118,6 @@ class Computer:
         ind = 0
         run = True
         while run:
-            print otherLetsRequired
             if ind >= len(self.for_guessing):
                 ind = 0
                 otherLetsRequired += 1
