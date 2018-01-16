@@ -296,6 +296,8 @@ class Computer:
                     if self.alphabet[lett][1] == 0:
                         knownLets.append(lett)
                         self.alphabet[lett][1] = 1
+        if len(self.possible) == 0:
+            print "There are no remaining possible words."
         if knownLets == tempKnownLets:
             return False
         else:
@@ -502,6 +504,7 @@ class Learning:
                           + "\nCAUTION: If your evaluation is incorrect, "
                           + "the program might break.")
                 eval2 = self.get_eval()
+                print comp.possible
                 if eval2 == "Same":
                     print "The computer won!"
                     game_over = True
