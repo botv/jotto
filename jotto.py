@@ -543,7 +543,6 @@ class Learning:
                     os.system("clear")
                 eval2 = self.get_eval(guess2[1])
                 os.system("clear")
-
                 # print comp.possible
                 if eval2 == "Same":
                     os.system("clear")
