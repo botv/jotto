@@ -43,7 +43,7 @@ class Computer:
         self.norepeat = filearr('words/words_without_repeats.txt')[:]
         self.repeat = filearr('words/words_with_repeats.txt')[:]
         self.common_words = filearr('words/common_words.txt')[:]
-        self.choice = random.choice(self.common_words)
+        self.choice = random.choice(self.norepeat)
         self.own_guesses = {}
         self.possible = self.norepeat[:]
 
@@ -519,7 +519,7 @@ class Learning:
         print("The game is about to begin. Good luck...")
         time.sleep(1)
         os.system("clear")
-        print("First, choose your word. My word is " + comp.choice)
+        print("First, choose your word. My word is " + comp.choice + ".")
         raw_input("Press [ENTER] once you have chosen a word.")
         os.system("clear")
         turn = 0
