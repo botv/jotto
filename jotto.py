@@ -158,9 +158,9 @@ class Computer:
         else:
             return ['strat2', self.strat2()]
 
-    def guess_complex(self, current_state, states_file):
+    def guess_complex(self, current_state):
         # A better guessing function
-        states_arr = filearr(states_file).split(";")
+        states_arr = filearr("states/states.txt").split(";")
         weights = []
         for state in states_arr:
             state = state.split(";")
@@ -384,14 +384,14 @@ class Learning:
             winner = None
             turn = 1
             while not game_over:
-                guess1 = p1.guess()
+                guess1 = p1.guess_complex()
                 eval1 = p2.eval_guess(guess1[1])
                 p1.update_lists(guess1[1], eval1, 'p1')
                 p1.update_alphabet(guess1[1], eval1)
                 self.record_player_state(p1, game, guess1[0], guess1[1],
                                          eval1, '1', str(turn))
                 if guess1[1] != p2.choice:
-                    guess2 = p2.guess()
+                    guess2 = p2.guess_complex()
                     eval2 = p1.eval_guess(guess2[1])
                     p2.update_lists(guess2[1], eval2, 'p2')
                     p2.update_alphabet(guess2[1], eval2)
