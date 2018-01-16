@@ -50,12 +50,11 @@ class Computer:
             letters = sorted(set(letters))
             if len(letters) > 21:
                 guess = random.choice(self.for_guessing)
-                return guess
             run = True
             ind = 0
             while run:
                 if len(letters) == 0:
-                    return random.choice(self.for_guessing)
+                    guess = random.choice(self.for_guessing)
                 if ind < len(self.for_guessing):
                     word = self.for_guessing[ind]
                     if not any(x in word for x in letters):
@@ -66,9 +65,15 @@ class Computer:
                 else:
                     letters.pop()
                     ind = 0
+        else:
+            guess = random.choice(self.for_guessing)
+        if guess:
             return guess
         else:
-            return random.choice(self.for_guessing)
+            print """There was an error in your evaluation of guesses.
+                     The letters you have comfirmed as true and false
+                     cannot be correct for any 5 letter word with
+                     letters that do not repeat."""
 
     def strat2(self):
         # Make the best possible guess
@@ -78,7 +83,6 @@ class Computer:
                 knownLets.append(lett)
         if len(knownLets) == 0:
             guess = random.choice(self.possible)
-            return guess
         ind = 0
         run = True
         while run:
@@ -109,7 +113,7 @@ class Computer:
                 if self.alphabet[lett][1] != 0:
                     somehowKnownLetters.append(lett)
         if len(somehowKnownLetters) == 0:
-            return random.choice(self.for_guessing)
+            guess = random.choice(self.for_guessing)
         otherLetsRequired = 5 - len(somehowKnownLetters)
         if otherLetsRequired < 1:
             otherLetsRequired = 1
@@ -120,7 +124,7 @@ class Computer:
                 ind = 0
                 otherLetsRequired += 1
             if otherLetsRequired == 5:
-                return random.choice(self.for_guessing)
+                guess = random.choice(self.for_guessing)
                 run = False
             word = self.for_guessing[ind]
             otherCount = 0
@@ -128,9 +132,16 @@ class Computer:
                 if lett not in somehowKnownLetters:
                     otherCount += 1
             if otherCount == otherLetsRequired:
-                return word
+                guess = word
                 run = False
             ind += 1
+        if guess:
+            return guess
+        else:
+            print """There was an error in your evaluation of guesses.
+                     The letters you have comfirmed as true and false
+                     cannot be correct for any 5 letter word with
+                     letters that do not repeat."""
 
     def eval_guess(self, guess):
         # Counts common letters between self.choice and guess
