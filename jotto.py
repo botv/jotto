@@ -582,5 +582,14 @@ def main():
     game.play_human()
 
 
+def train(games):
+    i = 0
+    while i < games:
+        game = Learning()
+        game.play()
+        cleanup()
+        i += 1
+
+
 if __name__ == "__main__":
     main()
