@@ -178,6 +178,8 @@ class Computer:
 
     def guess_complex(self, current_state, turn):
         # A better guessing function
+        if len(self.possible) == 1:
+            return ['strat2', self.strat2()]
         states_arr = filearr("states/states.txt")
         weights = []
         current_state = self.get_current_state(turn)
