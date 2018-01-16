@@ -82,7 +82,7 @@ class Computer:
             if self.alphabet[lett][1] == 1:
                 knownLets.append(lett)
         if len(knownLets) == 0:
-            guess = random.choice(self.possible)
+            return random.choice(self.possible)
         ind = 0
         run = True
         while run:
