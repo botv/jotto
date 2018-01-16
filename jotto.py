@@ -86,11 +86,6 @@ class Computer:
             guess = random.choice(self.for_guessing)
         if guess:
             return guess
-        else:
-            print """There was an error in your evaluation of guesses.
-                     The letters you have comfirmed as true and false
-                     cannot be correct for any 5 letter word with
-                     letters that do not repeat."""
 
     def strat2(self):
         # Make the best possible guess
@@ -116,11 +111,6 @@ class Computer:
                 ind += 1
         if guess:
             return guess
-        else:
-            print """There was an error in your evaluation of guesses.
-                     The letters you have comfirmed as true and false
-                     cannot be correct for any 5 letter word with
-                     letters that do not repeat."""
 
     def strat3(self):
         # Make a guess to find information on a letter
