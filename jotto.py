@@ -348,6 +348,7 @@ class Computer:
                 print(red("You either cheated or are just an idiot."))
                 time.sleep(1)
                 raw_input("Press [ENTER] to leave the game.")
+                os.system("clear")
                 quit()
 
 
