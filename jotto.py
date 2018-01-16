@@ -342,7 +342,7 @@ class Computer:
                     self.alphabet[letter][1] = -1
                     stillEliminating = True
             if len(self.possible) == 0:
-                os.system("clear.")
+                os.system("clear")
                 print(red("There are no remaining possible words."))
                 time.sleep(1)
                 print(red("You either cheated or are just an idiot."))
