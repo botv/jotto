@@ -31,6 +31,7 @@ def green(text):
             + text
             + u"\u001b[0m")
 
+
 def blue(text):
     return (u"\u001b[36m"
             + text
@@ -481,14 +482,16 @@ class Learning:
             word = word.lower()
             if len(word) != 5:
                 isGood = False
-                whatHappened.append(blue("-does not meet length requirement (5 letters)"))
+                whatHappened.append(red("-does not meet length requirement "
+                                    + "(5 letters)"))
             for lett in word:
                 if lett not in alphabet:
                     isGood = False
-                    whatHappened.append(blue("-non letter character \'" + lett + "\' used"))
+                    whatHappened.append(red("-non letter character \'"
+                                            + lett + "\' used"))
             if word not in wordlist:
                 isGood = False
-                whatHappened.append(blue("-word does not exist"))
+                whatHappened.append(red("-word does not exist"))
             if not isGood:
                 os.system("clear")
                 print(red("Your guess is invalid. Guess caught at:"))
@@ -512,14 +515,17 @@ class Learning:
                     return "Same"
                 isGood = False
                 if evaluation.isdigit():
-                    whatHappened.append(blue("-evaluation greater than five"))
+                    whatHappened.append(red("-evaluation greater than five"))
                 else:
-                    whatHappened.append(blue("-non number character used"))
+                    whatHappened.append(red("-non number character used"))
             if evaluation.isdigit():
                 if int(evaluation) > len(sorted(set(guess))):
                     isGood = False
-                    whatHappened.append(blue("-evaluation is greater than amount of unique letters "
-                                             + "in guess (only count repeated letters once!)"))
+                    whatHappened.append(red("-evaluation greater than "
+                                            + "amount of unique letters "
+                                            + "in guess")
+                                        + blue("\nTIP: only count "
+                                               + "repeated letters once!"))
             if not isGood:
                 os.system("clear")
                 print(red("Your evaluation is invalid. Evaluation caught at:"))
@@ -551,12 +557,14 @@ class Learning:
                 os.system("clear")
                 guess2 = comp.guess()
                 if turn == 1:
-                    print(red("NOTE: When you evaluate a guess, ")
-                              + red("only count repeated ")
-                              + red("letters once. If the guess is the same as ")
-                              + red("your word, reply ") + green("'true'") + red(". "))
+                    print(blue("NOTE: When you evaluate a guess, ")
+                          + blue("only count repeated ")
+                          + blue("letters once. \n      If the guess is"
+                          + " the same as ")
+                          + blue("your word, reply ")
+                          + blue("'true'."))
                     print(red("CAUTION: If your evaluation is incorrect, ")
-                          + red("the program might break."))
+                          + red("the program will break."))
                     raw_input("Press [ENTER] to continue.")
                     os.system("clear")
                 eval2 = self.get_eval(guess2[1])
