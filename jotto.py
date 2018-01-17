@@ -31,6 +31,11 @@ def green(text):
             + text
             + u"\u001b[0m")
 
+def blue(text):
+    return (u"\u001b[36m"
+            + text
+            + u"\u001b[0m")
+
 
 class Computer:
     def __init__(self):
@@ -469,20 +474,26 @@ class Learning:
         alphabet = 'abcdefghijklmnopqrstuvwxyz'
         wordlist = filearr('words/words.txt')[:]
         while not isGood:
+            whatHappened = []
             word = raw_input("Enter a valid guess (5 letters, "
                              + "no non-letter characters): ")
             isGood = True
             word = word.lower()
             if len(word) != 5:
                 isGood = False
+                whatHappened.append(blue("-does not meet length requirement (5 letters)"))
             for lett in word:
                 if lett not in alphabet:
                     isGood = False
+                    whatHappened.append(blue("-non letter character \'" + lett + "\' used"))
             if word not in wordlist:
                 isGood = False
+                whatHappened.append(blue("-word does not exist"))
             if not isGood:
                 os.system("clear")
-                print(red("Your guess is invalid."))
+                print(red("Your guess is invalid. Guess caught at:"))
+                for catch in whatHappened:
+                    print "    " + catch
                 raw_input("Press [ENTER] to go back to guessing.")
                 os.system("clear")
         return word
@@ -495,18 +506,25 @@ class Learning:
             print("My guess is: %s" % (guess))
             evaluation = raw_input("Evaluate my guess (an integer 0-5): ")
             isGood = True
+            whatHappened = []
             if evaluation not in nums:
                 if evaluation.lower() == 'true':
                     return "Same"
                 isGood = False
+                if evaluation.isdigit():
+                    whatHappened.append(blue("-evaluation greater than five"))
+                else:
+                    whatHappened.append(blue("-non number character used"))
+            if evaluation.isdigit():
+                if int(evaluation) > len(sorted(set(guess))):
+                    isGood = False
+                    whatHappened.append(blue("-evaluation is greater than amount of unique letters "
+                                             + "in guess (only count repeated letters once!)"))
+            if not isGood:
                 os.system("clear")
-                print(red("Your evaluation is invalid."))
-                raw_input("Press [ENTER] to go back to guess evaluation.")
-                os.system("clear")
-            elif int(evaluation) > len(sorted(set(guess))):
-                isGood = False
-                os.system("clear")
-                print(red("Your evaluation is invalid."))
+                print(red("Your evaluation is invalid. Evaluation caught at:"))
+                for catch in whatHappened:
+                    print("    " + catch)
                 raw_input("Press [ENTER] to go back to guess evaluation.")
                 os.system("clear")
         return int(evaluation)
@@ -517,9 +535,9 @@ class Learning:
         game_over = False
         os.system("clear")
         print("The game is about to begin. Good luck...")
-        time.sleep(1)
+        time.sleep(3)
         os.system("clear")
-        print("First, choose your word. My word is " + comp.choice + ".")
+        print("First, choose your word.")
         raw_input("Press [ENTER] once you have chosen a word.")
         os.system("clear")
         turn = 0
@@ -527,26 +545,27 @@ class Learning:
             turn += 1
             guess1 = self.get_guess()
             eval1 = comp.eval_guess(guess1)
-            print "My evaluation of your guess: %s" % (eval1)
-            raw_input("Press [ENTER] to continue.")
-            os.system("clear")
             if guess1 != comp.choice:
+                print "My evaluation of your guess: %s" % (eval1)
+                raw_input("Press [ENTER] to continue.")
+                os.system("clear")
                 guess2 = comp.guess()
                 if turn == 1:
-                    print(red("NOTE: When you evaluate a guess, "
-                              + "only count repeated "
-                              + "letters once. If the guess is the same as "
-                              + "your word, reply 'true'. "))
-                    print(red("CAUTION: If your evaluation is incorrect, "
-                          + "the program might break."))
+                    print(red("NOTE: When you evaluate a guess, ")
+                              + red("only count repeated ")
+                              + red("letters once. If the guess is the same as ")
+                              + red("your word, reply ") + green("'true'") + red(". "))
+                    print(red("CAUTION: If your evaluation is incorrect, ")
+                          + red("the program might break."))
                     raw_input("Press [ENTER] to continue.")
                     os.system("clear")
                 eval2 = self.get_eval(guess2[1])
                 os.system("clear")
+
                 # print comp.possible
                 if eval2 == "Same":
                     os.system("clear")
-                    print(green("Ha! I beat you!"))
+                    print(green("I won!"))
                     print("My word was " + comp.choice + ".")
                     raw_input("Press [ENTER] to leave the game.")
                     game_over = True
@@ -579,15 +598,6 @@ def check_average():
 def main():
     game = Learning()
     game.play_human()
-
-
-def train(games):
-    i = 0
-    while i < games:
-        game = Learning()
-        game.play()
-        cleanup()
-        i += 1
 
 
 if __name__ == "__main__":
