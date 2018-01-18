@@ -1,7 +1,7 @@
 import Tkinter as tk
 
 
-class Gui:
+class Evaluator:
     def load_test1(self):
         root = tk.Tk()
         root.title("Evaluation Tool")
@@ -68,7 +68,11 @@ class Gui:
             if len(guess_eval) == 5 and len(choice) == 5 and all_letters:
                 for letter in set(guess_eval):
                     common_out += choice.count(letter)
-                common.set("There are " + str(common_out) + " common letters.")
+                    if common_out == 1:
+                        common.set("There is 1 common letter.")
+                    else:
+                        common.set("There are " + str(common_out)
+                                   + " common letters.")
             else:
                 common.set("There's something wrong with your entry.")
 
@@ -84,7 +88,7 @@ class Gui:
 
 
 def main():
-    evaluator = Gui()
+    evaluator = Evaluator()
     evaluator.load_test3()
 
 
