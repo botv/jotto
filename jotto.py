@@ -4,10 +4,10 @@
 import random
 import string
 import time
-import numpy as np
 import ast
 import os
-# import tensorflow as tf
+import Tkinter as tk
+import numpy as np
 
 
 def filearr(file):
