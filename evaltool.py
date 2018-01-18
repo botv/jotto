@@ -2,61 +2,90 @@ import Tkinter as tk
 
 
 class Gui:
-    def load(self):
+    def load_test1(self):
         root = tk.Tk()
         root.title("Evaluation Tool")
         root.minsize(400, 400)
         root.maxsize(400, 400)
         root.resizable(width=False, height=False)
-
         hidden = tk.Entry(root, text="Hidden").grid(row=0, column=0)
         hidden.pack(side='bottom')
-
         guess = tk.Entry(root, text="Hidden").grid(row=0, column=1)
         guess.pack(side='bottom')
-
         submit = tk.Button(root, text="Close",
                            command=root.quit).grid(row=0, column=2)
         submit.pack(side='bottom')
-
         close = tk.Button(root, text="Close",
                           command=root.quit).grid(row=0, column=3)
         close.pack(side='bottom')
-
         root.mainloop()
 
-    def eval_guess(self, guess):
-        # Counts common letters between self.choice and guess
-        common = 0
-        for letter in set(guess):
-            common += self.choice.count(letter)
-        return common
-
-    def submit_data(self):
-        common_val = self.hidden.get()
-        guess_val = self.guess.get()
-        print [common_val, guess_val]
-
-    def loadColors(self):
+    def load_test2(self):
         r = 0
-        self.hidden = tk.Entry(width=5).grid(row=r, column=0)
-        self.guess = tk.Entry(width=5).grid(row=r, column=1)
+        hidden = tk.Entry(width=5)
+        hidden.pack()
+        hidden.focus_set()
+        guess = tk.Entry(width=5)
+        guess.pack()
+        guess.focus_set()
 
-        vals = tk.Button(text='Submit',
-                         command=self.submit_data).grid(row=r,
-                                                        column=2)
-
-        print vals
-        tk.Label().grid(row=r, column=3)
+        def submit_data():
+            common_val = hidden.get()
+            guess_val = guess.get()
+            print [common_val, guess_val]
+        tk.Button(text='Submit', command=submit_data).grid(row=r,
+                                                           column=2)
         tk.Button(text='Close', command=quit).grid(row=r, column=4)
-        r = r + 1
+        tk.mainloop()
 
+    def load_test3(self):
+        root = tk.Tk()
+        root.title("Jotto Evaluation Tool")
+        root.resizable(width=False, height=False)
+        options = tk.Frame(root)
+        options.pack(side='top')
+        # output = tk.Frame(root)
+        # output.pack(side='bottom')
+        hidden_val = tk.StringVar()
+        guess_val = tk.StringVar()
+        output_label = tk.Label(options, text="Hidden:")
+        output_label.pack(side='left')
+        hidden = tk.Entry(options, textvariable=guess_val, width=8)
+        hidden.pack(side='left')
+        hidden.focus_set()
+        output_label = tk.Label(options, text="Guess:")
+        output_label.pack(side='left')
+        guess = tk.Entry(options, textvariable=hidden_val, width=8)
+        guess.pack(side='left')
+        guess.focus_set()
+        common = tk.StringVar()
+
+        def eval_guess():
+            common_out = 0
+            guess_eval = guess.get()
+            choice = hidden.get()
+            all_letters = guess_eval.isalpha() and choice.isalpha()
+            if len(guess_eval) == 5 and len(choice) == 5 and all_letters:
+                for letter in set(guess_eval):
+                    common_out += choice.count(letter)
+                common.set("There are " + str(common_out) + " common letters.")
+            else:
+                common.set("There's something wrong with your entry.")
+
+        submit_button = tk.Button(options, text="Submit", width=5,
+                                  command=eval_guess)
+        submit_button.pack(side='left')
+        close_button = tk.Button(options, text='Close', command=quit)
+        close_button.pack(side='left')
+        output_label = tk.Label(root, relief='sunken',
+                                textvariable=common)
+        output_label.pack(side='bottom', fill='both')
         tk.mainloop()
 
 
 def main():
     evaluator = Gui()
-    evaluator.loadColors()
+    evaluator.load_test3()
 
 
 if __name__ == "__main__":
