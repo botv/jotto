@@ -9,7 +9,6 @@ git clone https://github.com/biggomega/jotto.git
 cd jotto
 python jotto.py
 ```
-Good luck!
 ### Strategies
 The Jottobot has three main strategies:
 1. Make a guess to get as much *new* information as possible.
