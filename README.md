@@ -4,11 +4,11 @@
 2. Players take turns guessing other five letter words. The other player then responds with a number between 1 and 5, indicating the number of common letters between his opponent's guess and his hidden word. For example, if one player's hidden word is 'spine' and his opponent guesses 'spoke', he would say '3'.
 3. The game is over when a player guesses his opponent's hidden word.
 ### Playing the Jottobot
-'''
+```
 git clone https://github.com/biggomega/jotto.git
 cd jotto
 python jotto.py
-'''
+```
 Good luck!
 ### Strategies
 The Jottobot has three main strategies:
