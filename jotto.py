@@ -524,8 +524,8 @@ class Learning:
                     whatHappened.append(red("-evaluation greater than "
                                             + "amount of unique letters "
                                             + "in guess")
-                                        + blue("\nTIP: only count "
-                                               + "repeated letters once!"))
+                                        + "\nTIP: only count "
+                                        + "repeated letters once!")
             if not isGood:
                 os.system("clear")
                 print(red("Your evaluation is invalid. Evaluation caught at:"))
@@ -557,12 +557,12 @@ class Learning:
                 os.system("clear")
                 guess2 = comp.guess()
                 if turn == 1:
-                    print(blue("NOTE: When you evaluate a guess, ")
-                          + blue("only count repeated ")
-                          + blue("letters once. \n      If the guess is"
-                          + " the same as ")
-                          + blue("your word, reply ")
-                          + blue("'true'."))
+                    print("NOTE: When you evaluate a guess, "
+                          + "only count repeated "
+                          + "letters once. \n      If the guess is"
+                          + " the same as "
+                          + "your word, reply "
+                          + "'true'.")
                     print(red("CAUTION: If your evaluation is incorrect, ")
                           + red("the program will break."))
                     raw_input("Press [ENTER] to continue.")
