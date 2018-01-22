@@ -13,7 +13,7 @@ def read(file)
 end
 
 def getSuccess(learnedInfo, turns)
-  return ((learnedInfo.to_i / 26.0) + 1 / turns).signif(3)
+  return ((learnedInfo.to_i / 26.0) * 1 / turns).signif(3)
 end
 
 def parser(winner=ARGV[0])
