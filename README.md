@@ -1,4 +1,4 @@
-# Jotto
+# The Jottobot
 ### Gameplay
 1. Each player chooses a five letter word with no repeating letters (keep it a secret!).
 2. Players take turns guessing other five letter words. The other player then responds with a number between 1 and 5, indicating the number of common letters between his opponent's guess and his hidden word. For example, if one player's hidden word is 'spine' and his opponent guesses 'spoke', he would say '3'.
