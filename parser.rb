@@ -13,7 +13,7 @@ def read(file)
 end
 
 def getSuccess(learnedInfo, turns)
-  return ((learnedInfo.to_i / 26.0) * 1 / turns).signif(3)
+  return ((((learnedInfo.to_i / 26.0) * 5) + (((1.0 / turns) * 26.0) * 3))/8).signif(3)
 end
 
 def parser(winner=ARGV[0])
@@ -40,7 +40,10 @@ def parser(winner=ARGV[0])
         lettersKnown += 1
       end
     end
-    File.open("states/states.txt", 'a') { |file| file << (datap[1] + ";" + lettersKnown.to_s + ";" + lettersNot.to_s + ";" + getSuccess(datap[datap.length-1]).to_s + ";" + datap[3] + "\n") }
+    File.open("states/states.txt", 'a') { |file| file << (datap[1] + ";" \
+              + lettersKnown.to_s + ";" + lettersNot.to_s + ";" \
+              + getSuccess(datap[datap.length-1]).to_s \
+              + ";" + datap[3] + "\n") }
   end
 end
 
