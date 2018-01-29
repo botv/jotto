@@ -52,6 +52,7 @@ class Computer:
         self.choice = random.choice(self.norepeat)
         self.own_guesses = {}
         self.possible = self.norepeat[:]
+        self.last_guess = ""
 
     def update_lists(self, guess, common, player):
         # Fixes stuff
@@ -96,28 +97,7 @@ class Computer:
 
     def strat2(self):
         # Make the best possible guess
-        knownLets = []
-        for lett in self.alphabet:
-            if self.alphabet[lett][1] == 1:
-                knownLets.append(lett)
-        if len(knownLets) == 0:
-            return random.choice(self.possible)
-        ind = 0
-        run = True
-        while run:
-            if ind >= len(self.possible):
-                ind = 0
-                knownLets.pop()
-            word = self.possible[ind]
-            if all(x in word for x in knownLets):
-                guess = word
-                run = False
-            elif len(knownLets) == 0:
-                run = False
-            else:
-                ind += 1
-        if guess:
-            return guess
+        return random.choice(self.possible)
 
     def strat3(self):
         # Make a guess to find information on a letter
@@ -147,6 +127,26 @@ class Computer:
                 run = False
             ind += 1
 
+    def strat4(self):
+        # Make a guess similar to the last guess
+        if self.last_guess == "":
+            return random.choice(self.norepeat)
+        ind = 0
+        run = True
+        evalGoal = 4
+        while run:
+            if ind >= len(self.norepeat):
+                ind = 0
+                evalGoal -= 1
+            if evalGoal == 0:
+                return random.choice(self.norepeat)
+                run = False
+            if self.eval_flex(set(self.last_guess),
+               self.norepeat[ind]) == evalGoal:
+                return self.norepeat[ind]
+                run = False
+            ind += 1
+
     def eval_guess(self, guess):
         # Counts common letters between self.choice and guess
         common = 0
@@ -154,13 +154,20 @@ class Computer:
             common += self.choice.count(letter)
         return common
 
+    def eval_flex(self, word, guess):
+        common = 0
+        for letter in set(guess):
+            common += word.count(letter)
+        return common
+
     def guess(self):
         # Chooses a strategy with weighted probabilities
-        prob1 = 1 / 3.0
-        prob2 = 1 / 3.0
-        prob3 = 1 / 3.0
-        strat = np.random.choice(['strat1', 'strat2', 'strat3'], 1,
-                                 p=[prob1, prob2, prob3])
+        prob1 = 1 / 4.0
+        prob2 = 1 / 4.0
+        prob3 = 1 / 4.0
+        prob4 = 1 / 4.0
+        strat = np.random.choice(['strat1', 'strat2', 'strat3', 'strat4'], 1,
+                                 p=[prob1, prob2, prob3, prob4])
         guess = getattr(self, strat[0])()
         return [strat[0], guess]
 
@@ -191,24 +198,35 @@ class Computer:
             return ['strat2', self.strat2()]
         states_arr = filearr("states/states.txt")
         weights = []
+        successes = {'strat1': 0, 'strat2': 0, 'strat3': 0, 'strat4': 0}
+        total_success = 0.0
         current_state = self.get_current_state(turn)
         for state in states_arr:
             state = state.split(";")
             strat_choice = state.pop(-1)
-            # scaled_success = state.pop(-2)
+            scaled_success = state.pop(-2)
             if state == current_state:
+                total_success += scaled_success
+                successes[strat_choice] += scaled_success
                 weights.append(strat_choice)
         if len(weights) != 0:
-            part_weight = 0.25 / float(len(weights))
-            prob1 = 0.25 + (part_weight * (weights.count('strat1')))
-            prob2 = 0.25 + (part_weight * (weights.count('strat2')))
-            prob3 = 0.25 + (part_weight * (weights.count('strat3')))
+            part_weight_count = (0.2 / float(len(weights))) / 2
+            part_weight_succ = (0.2 / float(total_success)) / 2
+            prob1 = 0.2 + (part_weight_count * (weights.count('strat1')))
+            + (part_weight_succ * (successes['strat1']))
+            prob2 = 0.2 + (part_weight_count * (weights.count('strat2')))
+            + (part_weight_succ * (successes['strat2']))
+            prob3 = 0.2 + (part_weight_count * (weights.count('strat3')))
+            + (part_weight_succ * (successes['strat3']))
+            prob4 = 0.2 + (part_weight_count * (weights.count('strat4')))
+            + (part_weight_succ * (successes['strat4']))
         else:
-            prob1 = 1 / 3.0
-            prob2 = 1 / 3.0
-            prob3 = 1 / 3.0
-        strat = np.random.choice(['strat1', 'strat2', 'strat3'], 1,
-                                 p=[prob1, prob2, prob3])
+            prob1 = 1 / 4.0
+            prob2 = 1 / 4.0
+            prob3 = 1 / 4.0
+            prob4 = 1 / 4.0
+        strat = np.random.choice(['strat1', 'strat2', 'strat3', 'strat4'], 1,
+                                 p=[prob1, prob2, prob3, prob4])
         guess = getattr(self, strat[0])()
         return [strat[0], guess]
 
@@ -315,6 +333,7 @@ class Computer:
 
     def update_alphabet(self, guess, common):
         # Super important function that updates the alphabet every turn
+        self.last_guess = guess
         self.own_guesses[guess] = common
         for letter in set(guess):
             if not self.eliminate_letter(letter):
