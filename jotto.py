@@ -128,9 +128,17 @@ class Computer:
             ind += 1
 
     def strat4(self):
-        # Make a guess similar to the last guess
+        # Make a guess similar to the last guess with unknown letters
         if self.last_guess == "":
             return random.choice(self.norepeat)
+        unknownLetsInLast = ""
+        for lett in self.last_guess:
+            if self.alphabet[lett][1] == 0:
+                unknownLetsInLast += lett
+        knownLetsInLast = ""
+        for lett in self.last_guess:
+            if lett not in unknownLetsInLast:
+                knownLetsInLast += lett
         ind = 0
         run = True
         evalGoal = 4
@@ -141,8 +149,9 @@ class Computer:
             if evalGoal == 0:
                 return random.choice(self.norepeat)
                 run = False
-            if self.eval_flex(set(self.last_guess),
-               self.norepeat[ind]) == evalGoal:
+            if self.eval_flex(sorted(set(unknownLetsInLast)),
+               self.norepeat[ind]) == evalGoal and self.eval_flex(sorted(set(knownLetsInLast)),
+               self.norepeat[ind]) == 0:
                 return self.norepeat[ind]
                 run = False
             ind += 1
@@ -154,10 +163,10 @@ class Computer:
             common += self.choice.count(letter)
         return common
 
-    def eval_flex(self, word, guess):
+    def eval_flex(self, lets, guess):
         common = 0
         for letter in set(guess):
-            common += word.count(letter)
+            common += lets.count(letter)
         return common
 
     def guess(self):
