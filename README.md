@@ -14,5 +14,6 @@ The Jottobot has three main strategies:
 1. Make a guess to get as much *new* information as possible.
 2. Make a guess to get information on a particular letter.
 3. Make an educated guess on the player's hidden word based on known information.
+4. Make a guess that contains the unknown letters of the last guess.
 ## How it works
 The Jottobot uses a number of learning algorithms to play Jotto. First of all, it plays itself to gain knowledge of the game. Once it has played itself a number of times, the guessing algorithm uses the success rates of the strategies in its training games to choose which strategy to choose ([see above](https://github.com/biggomega/jotto/blob/master/README.md#strategies)). After it chooses this strategy and gathers the player's evaluation, it calculates the success of the previous guess and uses that number in it's next turn.
