@@ -149,9 +149,11 @@ class Computer:
             if evalGoal == 0:
                 return random.choice(self.norepeat)
                 run = False
-            if self.eval_flex(sorted(set(unknownLetsInLast)),
-               self.norepeat[ind]) == evalGoal and self.eval_flex(sorted(set(knownLetsInLast)),
-               self.norepeat[ind]) == 0:
+            tests = (self.eval_flex(sorted(set(unknownLetsInLast)),
+                     self.norepeat[ind]) == evalGoal
+                     and self.eval_flex(sorted(set(knownLetsInLast)),
+                     self.norepeat[ind]) == 0)
+            if (tests):
                 return self.norepeat[ind]
                 run = False
             ind += 1
@@ -408,7 +410,7 @@ class Evaluator:
         def submit_data():
             common_val = hidden.get()
             guess_val = guess.get()
-            print [common_val, guess_val]
+            print([common_val, guess_val])
         tk.Button(text='Submit', command=submit_data).grid(row=r,
                                                            column=2)
         tk.Button(text='Close', command=quit).grid(row=r, column=4)
@@ -555,11 +557,11 @@ class Learning:
                     self.record_player_state(p2, game, guess2[0], guess2[1],
                                              eval2, '2', str(turn))
                     if guess2[1] == p1.choice:
-                        print "p2 wins"
+                        print("p2 wins")
                         game_over = True
                         winner = "2"
                 else:
-                    print "p1 wins"
+                    print("p1 wins")
                     game_over = True
                     winner = "1"
                 turn += 1
@@ -610,7 +612,7 @@ class Learning:
                 os.system("clear")
                 print(red("Your guess is invalid. Guess caught at:"))
                 for catch in whatHappened:
-                    print "    " + catch
+                    print("    " + catch)
                 raw_input("Press [ENTER] to go back to guessing.")
                 os.system("clear")
         return word
@@ -666,7 +668,7 @@ class Learning:
             guess1 = self.get_guess()
             eval1 = comp.eval_guess(guess1)
             if guess1 != comp.choice:
-                print "My evaluation of your guess: %s" % (eval1)
+                print("My evaluation of your guess: %s" % (eval1))
                 raw_input("Press [ENTER] to continue.")
                 os.system("clear")
                 guess2 = comp.guess()
@@ -697,8 +699,6 @@ class Learning:
                     os.system("clear")
                 eval2 = self.get_eval(guess2[1])
                 os.system("clear")
-
-                # print comp.possible
                 if eval2 == "Same":
                     os.system("clear")
                     print(green("I won!"))
