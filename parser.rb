@@ -13,7 +13,11 @@ def read(file)
 end
 
 def getSuccess(learnedInfo, turns)
-  return ((((learnedInfo.to_i / 26.0) * 5) + (((1.0 / turns) * 26.0) * 3))/8).signif(3)
+  success = ((((learnedInfo.to_f / 46.0) * 3) + ((20.0 / turns.to_f) * 5))/8)
+  if turns < 5
+    success /= 2.0
+  end
+  return success.signif(5)
 end
 
 def parser(winner=ARGV[0])
@@ -32,6 +36,7 @@ def parser(winner=ARGV[0])
     datap = line.split(";")
     lettersKnown = 0
     lettersNot = 0
+    learnedInfo = datap[-1].to_f
     alpha = eval(datap[2])
     alpha.each do |lett|
       if lett[1][1] == -1
@@ -42,7 +47,7 @@ def parser(winner=ARGV[0])
     end
     File.open("states/states.txt", 'a') { |file| file << (datap[1] + ";" \
               + lettersKnown.to_s + ";" + lettersNot.to_s + ";" \
-              + getSuccess(datap[datap.length-1]).to_s \
+              + getSuccess(learnedInfo, datap.length).to_s \
               + ";" + datap[3] + "\n") }
   end
 end
