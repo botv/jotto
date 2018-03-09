@@ -380,43 +380,7 @@ class Computer:
 
 
 class Evaluator:
-    def load_test1(self):
-        root = tk.Tk()
-        root.title("Evaluation Tool")
-        root.minsize(400, 400)
-        root.maxsize(400, 400)
-        root.resizable(width=False, height=False)
-        hidden = tk.Entry(root, text="Hidden").grid(row=0, column=0)
-        hidden.pack(side='bottom')
-        guess = tk.Entry(root, text="Hidden").grid(row=0, column=1)
-        guess.pack(side='bottom')
-        submit = tk.Button(root, text="Close",
-                           command=root.quit).grid(row=0, column=2)
-        submit.pack(side='bottom')
-        close = tk.Button(root, text="Close",
-                          command=root.quit).grid(row=0, column=3)
-        close.pack(side='bottom')
-        root.mainloop()
-
-    def load_test2(self):
-        r = 0
-        hidden = tk.Entry(width=5)
-        hidden.pack()
-        hidden.focus_set()
-        guess = tk.Entry(width=5)
-        guess.pack()
-        guess.focus_set()
-
-        def submit_data():
-            common_val = hidden.get()
-            guess_val = guess.get()
-            print([common_val, guess_val])
-        tk.Button(text='Submit', command=submit_data).grid(row=r,
-                                                           column=2)
-        tk.Button(text='Close', command=quit).grid(row=r, column=4)
-        tk.mainloop()
-
-    def load_test3(self):
+    def load(self):
         root = tk.Tk()
         root.title("Jotto Evaluation Tool")
         root.resizable(width=False, height=False)
@@ -686,7 +650,7 @@ class Learning:
                     while not continue_program:
                         if eval_tool == "y":
                             evaluator = Evaluator()
-                            evaluator.load_test3()
+                            evaluator.load()
                             continue_program = True
                         elif eval_tool == "n":
                             continue_program = True
@@ -733,7 +697,7 @@ def check_average():
 
 def main():
     game = Learning()
-    game.play_human()
+    game.play(1)
 
 
 if __name__ == "__main__":
