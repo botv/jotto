@@ -159,7 +159,7 @@ class Computer:
             ind += 1
 
     def eval_guess(self, guess):
-        # Counts common letters between self.choice and guess
+        # Counts common letters between choice and guess
         common = 0
         for letter in set(guess):
             common += self.choice.count(letter)
@@ -172,12 +172,14 @@ class Computer:
         return common
 
     def guess(self):
-        # Chooses a strategy with weighted probabilities
+        # Chooses a strategy with simple probability
+        # Deprecated since creation of guess_complex()
         prob1 = 1 / 4.0
         prob2 = 1 / 4.0
         prob3 = 1 / 4.0
         prob4 = 1 / 4.0
-        strat = np.random.choice(['strat1', 'strat2', 'strat3', 'strat4'], 1,
+        strat = np.random.choice(['strat1', 'strat2', 'strat3', 'strat4'],
+                                 1,
                                  p=[prob1, prob2, prob3, prob4])
         guess = getattr(self, strat[0])()
         return [strat[0], guess]
@@ -190,6 +192,7 @@ class Computer:
             return ['strat2', self.strat2()]
 
     def get_current_state(self, turn):
+        # Evaluates the current state of the game
         state = []
         state.append(str(turn))
         knownLets = 0
@@ -204,12 +207,18 @@ class Computer:
         return state
 
     def guess_complex(self, turn):
-        # A better guessing function
+        # A better guessing function with complex probability
+        # Deprecated since creation of guess_vs()
         if len(self.possible) < 4:
             return ['strat2', self.strat2()]
         states_arr = filearr("states/states.txt")
         weights = []
-        successes = {'strat1': 0, 'strat2': 0, 'strat3': 0, 'strat4': 0}
+        successes = {
+                        'strat1': 0,
+                        'strat2': 0,
+                        'strat3': 0,
+                        'strat4': 0
+                    }
         total_success = 0.0
         current_state = self.get_current_state(turn)
         for state in states_arr:
@@ -436,6 +445,7 @@ class Computer:
 
 class Evaluator:
     def load_test1(self):
+        # Deprecated since creation of load_test2
         root = tk.Tk()
         root.title("Evaluation Tool")
         root.minsize(400, 400)
@@ -454,6 +464,7 @@ class Evaluator:
         root.mainloop()
 
     def load_test2(self):
+        # Deprecated since creation of load_test3
         r = 0
         hidden = tk.Entry(width=5)
         hidden.pack()
@@ -472,6 +483,7 @@ class Evaluator:
         tk.mainloop()
 
     def load_test3(self):
+        # Optional common letter evaluation tool
         root = tk.Tk()
         root.title("Jotto Evaluation Tool")
         root.resizable(width=False, height=False)
@@ -520,7 +532,7 @@ class Evaluator:
         tk.mainloop()
 
 
-class Learning:
+class JottoBot:
     def __init__(self):
         self.sessions = open('states/sessions.txt', 'r+')
         self.time_file = open('states/turntime.txt', 'a')
@@ -604,8 +616,13 @@ class Learning:
                 if guess1[1] != p2.choice:
                     p1.update_lists(guess1[1], eval1, 'p1')
                     p1.update_alphabet(guess1[1], eval1, True)
-                    self.record_player_state(p1, game, guess1[0], guess1[1],
-                                             eval1, '1', str(turn))
+                    self.record_player_state(p1,
+                                             game,
+                                             guess1[0],
+                                             guess1[1],
+                                             eval1,
+                                             '1',
+                                             str(turn))
                     guess2 = p2.guess_complex(turn)
                     eval2 = p1.eval_guess(guess2[1])
                     if guess2[1] == p1.choice:
@@ -870,12 +887,12 @@ def check_average():
 
 
 def play_success():
-    game = Learning()
+    game = JottoBot()
     game.play_for_success(1)
 
 
 def main():
-    game = Learning()
+    game = JottoBot()
     game.play(1)
 
 
