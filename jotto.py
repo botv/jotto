@@ -593,171 +593,174 @@ class JottoBot:
         os.system("ruby parser.rb %s %s" % (winner, self.gam_string))
 
     def play(self, games):
-        if games > 9:
-            games = 9
-        self.sessions.seek(0)
-        self.sessions.truncate()
-        self.sessions.write(str(self.sess_id))
-        game = 1
-        start_time = time.time()
-        while game <= games:
-            p1 = Computer()
-            p2 = Computer()
-            self.save_game()
-            self.game_states = ""
-            if game != 1:
-                self.gam.write("=")
-            game_over = False
-            winner = None
-            turn = 1
-            while not game_over:
-                guess1 = p1.guess_complex(turn)
-                eval1 = p2.eval_guess(guess1[1])
-                if guess1[1] != p2.choice:
-                    p1.update_lists(guess1[1], eval1, 'p1')
-                    p1.update_alphabet(guess1[1], eval1, True)
-                    self.record_player_state(p1,
-                                             game,
-                                             guess1[0],
-                                             guess1[1],
-                                             eval1,
-                                             '1',
-                                             str(turn))
-                    guess2 = p2.guess_complex(turn)
-                    eval2 = p1.eval_guess(guess2[1])
-                    if guess2[1] == p1.choice:
-                        p2.update_lists(guess2[1], eval2, 'p2')
-                        p2.update_alphabet(guess2[1], eval2, False)
-                        self.record_player_state(p2,
+        for game in range(games):
+            self.sessions.seek(0)
+            self.sessions.truncate()
+            self.sessions.write(str(self.sess_id))
+            game = 1
+            start_time = time.time()
+            while game <= games:
+                p1 = Computer()
+                p2 = Computer()
+                self.save_game()
+                self.game_states = ""
+                if game != 1:
+                    self.gam.write("=")
+                game_over = False
+                winner = None
+                turn = 1
+                while not game_over:
+                    guess1 = p1.guess_complex(turn)
+                    eval1 = p2.eval_guess(guess1[1])
+                    if guess1[1] != p2.choice:
+                        p1.update_lists(guess1[1], eval1, 'p1')
+                        p1.update_alphabet(guess1[1], eval1, True)
+                        self.record_player_state(p1,
                                                  game,
-                                                 guess2[0],
-                                                 guess2[1],
-                                                 eval2,
-                                                 '2',
+                                                 guess1[0],
+                                                 guess1[1],
+                                                 eval1,
+                                                 '1',
                                                  str(turn))
-                        print("p2 wins")
-                        game_over = True
-                        winner = "2"
+                        guess2 = p2.guess_complex(turn)
+                        eval2 = p1.eval_guess(guess2[1])
+                        if guess2[1] == p1.choice:
+                            p2.update_lists(guess2[1], eval2, 'p2')
+                            p2.update_alphabet(guess2[1], eval2, False)
+                            self.record_player_state(p2,
+                                                     game,
+                                                     guess2[0],
+                                                     guess2[1],
+                                                     eval2,
+                                                     '2',
+                                                     str(turn))
+                            print("p2 wins")
+                            game_over = True
+                            winner = "2"
+                        else:
+                            p2.update_lists(guess2[1], eval2, 'p2')
+                            p2.update_alphabet(guess2[1], eval2, True)
+                            self.record_player_state(p2,
+                                                     game,
+                                                     guess2[0],
+                                                     guess2[1],
+                                                     eval2,
+                                                     '2',
+                                                     str(turn))
                     else:
-                        p2.update_lists(guess2[1], eval2, 'p2')
-                        p2.update_alphabet(guess2[1], eval2, True)
-                        self.record_player_state(p2,
+                        p1.update_lists(guess1[1],
+                                        eval1,
+                                        'p1')
+                        p1.update_alphabet(guess1[1],
+                                           eval1,
+                                           False)
+                        self.record_player_state(p1,
                                                  game,
-                                                 guess2[0],
-                                                 guess2[1],
-                                                 eval2,
-                                                 '2',
+                                                 guess1[0],
+                                                 guess1[1],
+                                                 eval1,
+                                                 '1',
                                                  str(turn))
-                else:
-                    p1.update_lists(guess1[1],
-                                    eval1,
-                                    'p1')
-                    p1.update_alphabet(guess1[1],
-                                       eval1,
-                                       False)
-                    self.record_player_state(p1,
-                                             game,
-                                             guess1[0],
-                                             guess1[1],
-                                             eval1,
-                                             '1',
-                                             str(turn))
-                    print("p1 wins")
-                    game_over = True
-                    winner = "1"
-                turn += 1
-            self.save_game()
-            self.game_states = ""
-            game += 1
-            elapsed = time.time() - start_time
-            self.time_file.write(str(round(elapsed, 3))
-                                 + ":"
-                                 + str(turn - 1)
-                                 + ":"
-                                 + str(int((turn - 1) / elapsed))
-                                 + ":"
-                                 + winner
-                                 + "\n")
-            self.parser(winner)
+                        print("p1 wins")
+                        game_over = True
+                        winner = "1"
+                    turn += 1
+                self.save_game()
+                self.game_states = ""
+                game += 1
+                elapsed = time.time() - start_time
+                self.time_file.write(str(round(elapsed, 3))
+                                     + ":"
+                                     + str(turn - 1)
+                                     + ":"
+                                     + str(int((turn - 1) / elapsed))
+                                     + ":"
+                                     + winner
+                                     + "\n")
+                self.parser(winner)
 
     def play_for_success(self, games):
-        if games > 9:
-            games = 9
-        self.sessions.seek(0)
-        self.sessions.truncate()
-        self.sessions.write(str(self.sess_id))
-        game = 1
-        start_time = time.time()
-        while game <= games:
-            p1 = Computer()
-            p2 = Computer()
-            self.save_game()
-            self.game_states = ""
-            if game != 1:
-                self.gam.write("=")
-            game_over = False
-            winner = None
-            turn = 1
-            while not game_over:
-                guess1 = p1.guess_vs(turn)
-                eval1 = p2.eval_guess(guess1[1])
-                if guess1[1] != p2.choice:
-                    p1.update_lists(guess1[1], eval1, 'p1')
-                    p1.update_alphabet(guess1[1], eval1, True)
-                    self.record_player_state(p1, game, guess1[0], guess1[1],
-                                             eval1, '1', str(turn))
-                    guess2 = p2.guess_vs(turn)
-                    eval2 = p1.eval_guess(guess2[1])
-                    if guess2[1] == p1.choice:
-                        p2.update_lists(guess2[1], eval2, 'p2')
-                        p2.update_alphabet(guess2[1], eval2, False)
-                        self.record_player_state(p2,
+        for game in range(games):
+            self.sessions.seek(0)
+            self.sessions.truncate()
+            self.sessions.write(str(self.sess_id))
+            game = 1
+            start_time = time.time()
+            while game <= games:
+                p1 = Computer()
+                p2 = Computer()
+                self.save_game()
+                self.game_states = ""
+                if game != 1:
+                    self.gam.write("=")
+                game_over = False
+                winner = None
+                turn = 1
+                while not game_over:
+                    guess1 = p1.guess_vs(turn)
+                    eval1 = p2.eval_guess(guess1[1])
+                    if guess1[1] != p2.choice:
+                        p1.update_lists(guess1[1], eval1, 'p1')
+                        p1.update_alphabet(guess1[1], eval1, True)
+                        self.record_player_state(p1,
                                                  game,
-                                                 guess2[0],
-                                                 guess2[1],
-                                                 eval2,
-                                                 '2',
+                                                 guess1[0],
+                                                 guess1[1],
+                                                 eval1,
+                                                 '1',
                                                  str(turn))
-                        print("p2 wins")
-                        game_over = True
-                        winner = "2"
+                        guess2 = p2.guess_vs(turn)
+                        eval2 = p1.eval_guess(guess2[1])
+                        if guess2[1] == p1.choice:
+                            p2.update_lists(guess2[1], eval2, 'p2')
+                            p2.update_alphabet(guess2[1], eval2, False)
+                            self.record_player_state(p2,
+                                                     game,
+                                                     guess2[0],
+                                                     guess2[1],
+                                                     eval2,
+                                                     '2',
+                                                     str(turn))
+                            print("p2 wins")
+                            game_over = True
+                            winner = "2"
+                        else:
+                            p2.update_lists(guess2[1], eval2, 'p2')
+                            p2.update_alphabet(guess2[1], eval2, True)
+                            self.record_player_state(p2,
+                                                     game,
+                                                     guess2[0],
+                                                     guess2[1],
+                                                     eval2,
+                                                     '2',
+                                                     str(turn))
                     else:
-                        p2.update_lists(guess2[1], eval2, 'p2')
-                        p2.update_alphabet(guess2[1], eval2, True)
-                        self.record_player_state(p2,
+                        p1.update_lists(guess1[1], eval1, 'p1')
+                        p1.update_alphabet(guess1[1], eval1, False)
+                        self.record_player_state(p1,
                                                  game,
-                                                 guess2[0],
-                                                 guess2[1],
-                                                 eval2,
-                                                 '2',
+                                                 guess1[0],
+                                                 guess1[1],
+                                                 eval1,
+                                                 '1',
                                                  str(turn))
-                else:
-                    p1.update_lists(guess1[1], eval1, 'p1')
-                    p1.update_alphabet(guess1[1], eval1, False)
-                    self.record_player_state(p1,
-                                             game,
-                                             guess1[0],
-                                             guess1[1],
-                                             eval1,
-                                             '1',
-                                             str(turn))
-                    print("p1 wins")
-                    game_over = True
-                    winner = "1"
-                turn += 1
-            self.save_game()
-            self.game_states = ""
-            game += 1
-            elapsed = time.time() - start_time
-            self.time_file.write(str(round(elapsed, 3))
-                                 + ":"
-                                 + str(turn - 1)
-                                 + ":"
-                                 + str(int((turn - 1) / elapsed))
-                                 + ":"
-                                 + winner
-                                 + "\n")
-            self.parser(winner)
+                        print("p1 wins")
+                        game_over = True
+                        winner = "1"
+                    turn += 1
+                self.save_game()
+                self.game_states = ""
+                game += 1
+                elapsed = time.time() - start_time
+                self.time_file.write(str(round(elapsed, 3))
+                                     + ":"
+                                     + str(turn - 1)
+                                     + ":"
+                                     + str(int((turn - 1) / elapsed))
+                                     + ":"
+                                     + winner
+                                     + "\n")
+                self.parser(winner)
 
     def get_average(self):
         timearr = filearr(self.time_file)
