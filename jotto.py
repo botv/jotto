@@ -628,23 +628,40 @@ class JottoBot:
                     if guess2[1] == p1.choice:
                         p2.update_lists(guess2[1], eval2, 'p2')
                         p2.update_alphabet(guess2[1], eval2, False)
-                        self.record_player_state(p2, game, guess2[0],
+                        self.record_player_state(p2,
+                                                 game,
+                                                 guess2[0],
                                                  guess2[1],
-                                                 eval2, '2', str(turn))
+                                                 eval2,
+                                                 '2',
+                                                 str(turn))
                         print("p2 wins")
                         game_over = True
                         winner = "2"
                     else:
                         p2.update_lists(guess2[1], eval2, 'p2')
                         p2.update_alphabet(guess2[1], eval2, True)
-                        self.record_player_state(p2, game, guess2[0],
+                        self.record_player_state(p2,
+                                                 game,
+                                                 guess2[0],
                                                  guess2[1],
-                                                 eval2, '2', str(turn))
+                                                 eval2,
+                                                 '2',
+                                                 str(turn))
                 else:
-                    p1.update_lists(guess1[1], eval1, 'p1')
-                    p1.update_alphabet(guess1[1], eval1, False)
-                    self.record_player_state(p1, game, guess1[0], guess1[1],
-                                             eval1, '1', str(turn))
+                    p1.update_lists(guess1[1],
+                                    eval1,
+                                    'p1')
+                    p1.update_alphabet(guess1[1],
+                                       eval1,
+                                       False)
+                    self.record_player_state(p1,
+                                             game,
+                                             guess1[0],
+                                             guess1[1],
+                                             eval1,
+                                             '1',
+                                             str(turn))
                     print("p1 wins")
                     game_over = True
                     winner = "1"
@@ -654,9 +671,13 @@ class JottoBot:
             game += 1
             elapsed = time.time() - start_time
             self.time_file.write(str(round(elapsed, 3))
-                                 + ":" + str(turn - 1) + ":"
+                                 + ":"
+                                 + str(turn - 1)
+                                 + ":"
                                  + str(int((turn - 1) / elapsed))
-                                 + ":" + winner + "\n")
+                                 + ":"
+                                 + winner
+                                 + "\n")
             self.parser(winner)
 
     def play_for_success(self, games):
@@ -713,8 +734,13 @@ class JottoBot:
                 else:
                     p1.update_lists(guess1[1], eval1, 'p1')
                     p1.update_alphabet(guess1[1], eval1, False)
-                    self.record_player_state(p1, game, guess1[0], guess1[1],
-                                             eval1, '1', str(turn))
+                    self.record_player_state(p1,
+                                             game,
+                                             guess1[0],
+                                             guess1[1],
+                                             eval1,
+                                             '1',
+                                             str(turn))
                     print("p1 wins")
                     game_over = True
                     winner = "1"
@@ -724,9 +750,13 @@ class JottoBot:
             game += 1
             elapsed = time.time() - start_time
             self.time_file.write(str(round(elapsed, 3))
-                                 + ":" + str(turn - 1) + ":"
+                                 + ":"
+                                 + str(turn - 1)
+                                 + ":"
                                  + str(int((turn - 1) / elapsed))
-                                 + ":" + winner + "\n")
+                                 + ":"
+                                 + winner
+                                 + "\n")
             self.parser(winner)
 
     def get_average(self):
