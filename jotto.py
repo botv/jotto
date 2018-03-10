@@ -923,14 +923,18 @@ def play_success():
     game.play_for_success(1)
 
 
-def main():
+def play_normal():
     game = JottoBot()
     game.play(1)
 
 
-if __name__ == "__main__":
+def main():
     for i in range(0, 1000):
-        main()
+        play_normal()
     for i in range(0, 100):
         play_success()
     check_average()
+
+
+if __name__ == "__main__":
+    main()
