@@ -149,9 +149,11 @@ class Computer:
             if evalGoal == 0:
                 return random.choice(self.norepeat)
                 run = False
-            if self.eval_flex(sorted(set(unknownLetsInLast)),
-               self.norepeat[ind]) == evalGoal and self.eval_flex(sorted(set(knownLetsInLast)),
-               self.norepeat[ind]) == 0:
+            check = (self.eval_flex(sorted(set(unknownLetsInLast)),
+                     self.norepeat[ind]) == evalGoal
+                     and self.eval_flex(sorted(set(knownLetsInLast)),
+                     self.norepeat[ind]) == 0)
+            if check:
                 return self.norepeat[ind]
                 run = False
             ind += 1
@@ -267,10 +269,12 @@ class Computer:
                      + ((part_weight_s * (successes['strat3'])) * 3)) / 8))
             prob4 = (0.2 + ((((part_weight_c * (weights.count('strat4'))) * 5)
                      + ((part_weight_s * (successes['strat4'])) * 3)) / 8))
-            weightDict = {'strat1': prob1,
-                          'strat2': prob2,
-                          'strat3': prob3,
-                          'strat4': prob4}
+            weightDict = {
+                            'strat1': prob1,
+                            'strat2': prob2,
+                            'strat3': prob3,
+                            'strat4': prob4
+                         }
             weightList = []
             for key, value in sorted(weightDict.iteritems(),
                                      key=lambda (k, v): (v, k)):
@@ -771,8 +775,8 @@ class Learning:
                 if int(evaluation) > len(sorted(set(guess))):
                     isGood = False
                     whatHappened.append(blue("-evaluation greater than "
-                                            + "amount of unique letters "
-                                            + "in guess")
+                                             + "amount of unique letters "
+                                             + "in guess")
                                         + "\nTIP: only count "
                                         + "repeated letters once!")
             if not isGood:
