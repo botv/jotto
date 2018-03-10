@@ -880,8 +880,8 @@ class JottoBot:
                         else:
                             eval_tool = raw_input("\033[F\033[KPlease enter"
                                                   + " 'y' or 'n': ")
-                    print(red("CAUTION: If your evaluation is incorrect, ")
-                          + red("the program will break."))
+                    print(red("CAUTION: If your evaluation is incorrect, "
+                              + "the program will break."))
                     raw_input("Press [ENTER] to continue.")
                     os.system("clear")
                 eval2 = self.get_eval(guess2[1])
@@ -889,7 +889,9 @@ class JottoBot:
                 if eval2 == "Same":
                     os.system("clear")
                     print(green("I won!"))
-                    print("My word was " + comp.choice + ".")
+                    print("My word was "
+                          + comp.choice
+                          + ".")
                     raw_input("Press [ENTER] to leave the game.")
                     game_over = True
                     os.system("clear")
@@ -899,7 +901,9 @@ class JottoBot:
             else:
                 os.system("clear")
                 print(green("You won!"))
-                print("I had " + str(len(comp.possible)) + " words in my "
+                print("I had "
+                      + str(len(comp.possible))
+                      + " words in my "
                       + "possible word list.")
                 raw_input("Press [ENTER] to leave the game.")
                 game_over = True
