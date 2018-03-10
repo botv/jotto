@@ -543,8 +543,13 @@ class JottoBot:
         self.data = 'states/games/sess' + str(self.sess_id) + '.txt'
         self.game_states = ""
 
-    def record_player_state(self, player, game, strategy,
-                            guess, common, player_name, turn):
+    def record_player_state(self,
+                            player,
+                            strategy,
+                            guess,
+                            common,
+                            player_name,
+                            turn):
         alphabetStr = str(player.alphabet).replace(':', '=>')
         nowInfo = 0
         for lett in player.alphabet:
@@ -617,7 +622,6 @@ class JottoBot:
                     p1.update_lists(guess1[1], eval1, 'p1')
                     p1.update_alphabet(guess1[1], eval1, True)
                     self.record_player_state(p1,
-                                             game,
                                              guess1[0],
                                              guess1[1],
                                              eval1,
@@ -629,7 +633,6 @@ class JottoBot:
                         p2.update_lists(guess2[1], eval2, 'p2')
                         p2.update_alphabet(guess2[1], eval2, False)
                         self.record_player_state(p2,
-                                                 game,
                                                  guess2[0],
                                                  guess2[1],
                                                  eval2,
@@ -642,7 +645,6 @@ class JottoBot:
                         p2.update_lists(guess2[1], eval2, 'p2')
                         p2.update_alphabet(guess2[1], eval2, True)
                         self.record_player_state(p2,
-                                                 game,
                                                  guess2[0],
                                                  guess2[1],
                                                  eval2,
@@ -656,7 +658,6 @@ class JottoBot:
                                        eval1,
                                        False)
                     self.record_player_state(p1,
-                                             game,
                                              guess1[0],
                                              guess1[1],
                                              eval1,
@@ -704,15 +705,18 @@ class JottoBot:
                 if guess1[1] != p2.choice:
                     p1.update_lists(guess1[1], eval1, 'p1')
                     p1.update_alphabet(guess1[1], eval1, True)
-                    self.record_player_state(p1, game, guess1[0], guess1[1],
-                                             eval1, '1', str(turn))
+                    self.record_player_state(p1,
+                                             guess1[0],
+                                             guess1[1],
+                                             eval1,
+                                             '1',
+                                             str(turn))
                     guess2 = p2.guess_vs(turn)
                     eval2 = p1.eval_guess(guess2[1])
                     if guess2[1] == p1.choice:
                         p2.update_lists(guess2[1], eval2, 'p2')
                         p2.update_alphabet(guess2[1], eval2, False)
                         self.record_player_state(p2,
-                                                 game,
                                                  guess2[0],
                                                  guess2[1],
                                                  eval2,
@@ -725,7 +729,6 @@ class JottoBot:
                         p2.update_lists(guess2[1], eval2, 'p2')
                         p2.update_alphabet(guess2[1], eval2, True)
                         self.record_player_state(p2,
-                                                 game,
                                                  guess2[0],
                                                  guess2[1],
                                                  eval2,
@@ -735,7 +738,6 @@ class JottoBot:
                     p1.update_lists(guess1[1], eval1, 'p1')
                     p1.update_alphabet(guess1[1], eval1, False)
                     self.record_player_state(p1,
-                                             game,
                                              guess1[0],
                                              guess1[1],
                                              eval1,
