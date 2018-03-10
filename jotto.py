@@ -771,65 +771,65 @@ class JottoBot:
         print(str(first_avg) + "::" + str(last_avg))
 
     def get_guess(self):
-        isGood = False
+        is_good = False
         alphabet = 'abcdefghijklmnopqrstuvwxyz'
         wordlist = filearr('words/words.txt')[:]
-        while not isGood:
-            whatHappened = []
+        while not is_good:
+            what_happened = []
             word = raw_input("Enter a valid guess (5 letters, "
                              + "no non-letter characters): ")
-            isGood = True
+            is_good = True
             word = word.lower()
             if len(word) != 5:
-                isGood = False
-                whatHappened.append(red("-does not meet length requirement "
-                                    + "(5 letters)"))
+                is_good = False
+                what_happened.append(red("-does not meet length requirement "
+                                     + "(5 letters)"))
             for lett in word:
                 if lett not in alphabet:
-                    isGood = False
-                    whatHappened.append(red("-non letter character \'"
-                                            + lett + "\' used"))
+                    is_good = False
+                    what_happened.append(red("-non letter character \'"
+                                             + lett + "\' used"))
             if word not in wordlist:
-                isGood = False
-                whatHappened.append(red("-word does not exist"))
-            if not isGood:
+                is_good = False
+                what_happened.append(red("-word does not exist"))
+            if not is_good:
                 os.system("clear")
                 print(red("Your guess is invalid. Guess caught at:"))
-                for catch in whatHappened:
+                for catch in what_happened:
                     print("    %s" % (catch))
                 raw_input("Press [ENTER] to go back to guessing.")
                 os.system("clear")
         return word
 
     def get_eval(self, guess):
-        isGood = False
+        is_good = False
         nums = ['0', '1', '2', '3', '4', '5']
 
-        while not isGood:
+        while not is_good:
             print("My guess is: %s" % (guess))
             evaluation = raw_input("Evaluate my guess (an integer 0-5): ")
-            isGood = True
-            whatHappened = []
+            is_good = True
+            what_happened = []
             if evaluation not in nums:
                 if evaluation.lower() == 'true':
                     return "Same"
-                isGood = False
+                is_good = False
                 if evaluation.isdigit():
-                    whatHappened.append(red("-evaluation greater than five"))
+                    what_happened.append(red("-evaluation greater than five"))
                 else:
-                    whatHappened.append(red("-non number character used"))
+                    what_happened.append(red("-non number character used"))
             if evaluation.isdigit():
                 if int(evaluation) > len(sorted(set(guess))):
-                    isGood = False
-                    whatHappened.append(blue("-evaluation greater than "
-                                             + "amount of unique letters "
-                                             + "in guess")
-                                        + "\nTIP: only count "
-                                        + "repeated letters once!")
-            if not isGood:
+                    is_good = False
+                    what_happened.append(blue("-evaluation greater than "
+                                              + "amount of unique letters "
+                                              + "in guess")
+                                         + "\nTIP: only count "
+                                         + "repeated letters once!")
+            if not is_good:
                 os.system("clear")
                 print(red("Your evaluation is invalid. Evaluation caught at:"))
-                for catch in whatHappened:
+                for catch in what_happened:
                     print("    %s" % (catch))
                 raw_input("Press [ENTER] to go back to guess evaluation.")
                 os.system("clear")
