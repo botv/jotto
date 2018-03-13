@@ -751,6 +751,13 @@ class JottoBot:
         # Play against a human
         comp = Computer()
         game_over = False
+        game_results = {
+                        "winner": str(),
+                        "my_word": comp.choice,
+                        "guesses": int(),
+                        "p1_guesses": dict(),
+                        "p2_guesses": dict()
+                       }
         os.system("clear")
         print("The game is about to begin. Good luck...")
         time.sleep(3)
@@ -763,6 +770,7 @@ class JottoBot:
             turn += 1
             guess1 = self.get_guess()
             eval1 = comp.eval_guess(guess1)
+            game_results["p1_guesses"][guess1] = eval1
             if guess1 != comp.choice:
                 print("My evaluation of your guess: %s" % (eval1))
                 raw_input("Press [ENTER] to continue.")
@@ -793,10 +801,12 @@ class JottoBot:
                     raw_input("Press [ENTER] to continue.")
                     os.system("clear")
                 eval2 = self.get_eval(guess2[1])
+                game_results["p2_guesses"][guess2] = eval2
                 os.system("clear")
                 if eval2 == "Same":
                     os.system("clear")
                     print(green("I won!"))
+                    game_results["winner"] = "Computer"
                     print("My word was "
                           + comp.choice
                           + ".")
@@ -809,6 +819,7 @@ class JottoBot:
             else:
                 os.system("clear")
                 print(green("You won!"))
+                game_results["winner"] = "Human"
                 print("I had "
                       + str(len(comp.possible))
                       + " words in my "
@@ -816,6 +827,12 @@ class JottoBot:
                 raw_input("Press [ENTER] to leave the game.")
                 game_over = True
                 os.system("clear")
+        game_results["guesses"] = len(game_results["p1_guesses"])
+        return(game_results)
+
+    def print_results(self, results):
+        # This is only useful to Ben and Robert (they have a Pi)
+        os.system("echo -e \"%s\n\" > /dev/ttyUSB0")
 
 
 def check_average():
@@ -841,11 +858,15 @@ def play_normal():
 
 
 def main():
-    for i in range(0, 1000):
-        play_normal()
-    for i in range(0, 100):
-        play_success()
-    check_average()
+    # *** FOR TRAINING ***
+    # for i in range(0, 1000):
+    #     play_normal()
+    # for i in range(0, 100):
+    #     play_success()
+    # check_average()
+    # *** FOR HUMAN PLAY ***
+    game = JottoBot()
+    print(game.play_human())
 
 
 if __name__ == "__main__":
