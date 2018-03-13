@@ -755,8 +755,8 @@ class JottoBot:
                         "winner": str(),
                         "my_word": comp.choice,
                         "guesses": int(),
-                        "p1_guesses": dict(),
-                        "p2_guesses": dict()
+                        "p1_guesses": {},
+                        "p2_guesses": {}
                        }
         os.system("clear")
         print("The game is about to begin. Good luck...")
@@ -770,7 +770,7 @@ class JottoBot:
             turn += 1
             guess1 = self.get_guess()
             eval1 = comp.eval_guess(guess1)
-            game_results["p1_guesses"][guess1] = eval1
+            game_results["p1_guesses"][str(guess1)] = eval1
             if guess1 != comp.choice:
                 print("My evaluation of your guess: %s" % (eval1))
                 raw_input("Press [ENTER] to continue.")
@@ -801,7 +801,7 @@ class JottoBot:
                     raw_input("Press [ENTER] to continue.")
                     os.system("clear")
                 eval2 = self.get_eval(guess2[1])
-                game_results["p2_guesses"][guess2] = eval2
+                game_results["p2_guesses"][str(guess2)] = eval2
                 os.system("clear")
                 if eval2 == "Same":
                     os.system("clear")
