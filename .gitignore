@@ -109,6 +109,3 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-
-# training
-states/
