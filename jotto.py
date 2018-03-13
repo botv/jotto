@@ -862,8 +862,7 @@ def main():
     # check_average()
     # *** FOR HUMAN PLAY ***
     game = JottoBot()
-    results = game.play_human()
-    print(results)
+    game.play_human()
 
 
 if __name__ == "__main__":
