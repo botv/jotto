@@ -434,10 +434,10 @@ class Computer:
                 time.sleep(1)
                 print(red("You either cheated or are just an idiot."))
                 time.sleep(1)
-                print(red("Your evaluations were: "))
+                print(red("Your evaluations were: \n"))
                 for guess, evall in self.own_guesses.iteritems():
-                    print(blue("%s: %s" % (guess, evall)))
-                raw_input("Press [ENTER] to leave the game.")
+                    print("%s: %s" % (guess, evall))
+                raw_input("\nPress [ENTER] to leave the game.")
                 os.system("clear")
                 quit()
 
@@ -508,8 +508,6 @@ class JottoBot:
         os.system("ruby parser.rb %s %s" % (winner, self.gam_string))
 
     def play(self, games):
-        if games > 9:
-            games = 9
         self.sessions.seek(0)
         self.sessions.truncate()
         self.sessions.write(str(self.sess_id))
@@ -592,8 +590,6 @@ class JottoBot:
             self.parser(winner)
 
     def play_for_success(self, games):
-        if games > 9:
-            games = 9
         self.sessions.seek(0)
         self.sessions.truncate()
         self.sessions.write(str(self.sess_id))
@@ -830,7 +826,7 @@ class JottoBot:
         game_results["guesses"] = len(game_results["p1_guesses"])
         return(game_results)
 
-    def print_results(self, results):
+    def thermal(self, results):
         # This is only useful to Ben and Robert (they have a Pi)
         os.system("echo -e \"%s\n\" > /dev/ttyUSB0")
 
@@ -866,7 +862,8 @@ def main():
     # check_average()
     # *** FOR HUMAN PLAY ***
     game = JottoBot()
-    print(game.play_human())
+    results = game.play_human()
+    print(results)
 
 
 if __name__ == "__main__":
