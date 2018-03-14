@@ -10,7 +10,7 @@ cd jotto
 python jotto.py
 ```
 ## Strategies
-The Jottobot has three main strategies:
+The Jottobot has four main strategies:
 1. Make a guess to get as much *new* information as possible.
 2. Make a guess to get information on a particular letter.
 3. Make an educated guess on the player's hidden word based on known information.
