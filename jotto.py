@@ -1,4 +1,4 @@
-# The Jottobot
+# The JottoBot
 # Ben Botvinick & Robert May, 2018
 
 import random
