@@ -1,12 +1,13 @@
 # AlphaJotto
 # Ben Botvinick & Robert May, 2018
 
+import argparse
+import matplotlib.pyplot as plt
 import numpy as np
 import os
 import string
 import sys
 import time
-import matplotlib.pyplot as plt
 
 
 class Utils:
@@ -37,6 +38,13 @@ class Utils:
     def truncate(filename):
         with open(filename, "w") as f:
             f.truncate()
+
+    def parser():
+        parser = argparse.ArgumentParser(prog="jotto")
+        parser.add_argument("--train", metavar="GAMES", type=int, default=2000,
+                            help="train the agent")
+        args = parser.parse_args()
+        return args
 
     def graph_training():
         turns = []
@@ -421,18 +429,13 @@ class Learning:
         self.time_file = open("jotto_files/turntime.txt", "a+")
         self.game_states = ""
 
-    def train(self, explore=500, exploit=100):
+    def train(self, games):
         Utils.truncate(self.time_file_path)
         i = 0
-        while i < explore:
-            print("Game: ", i)
+        while i < games:
             self.play("explore")
-            i += 1
-        while i < explore + exploit:
-            print("Game: ", i)
             self.play("exploit", write=True)
             i += 1
-        Utils.graph_training()
 
     def play(self, style, write=False):
         start_time = time.time()
@@ -687,10 +690,13 @@ class Interactive:
 
 
 def main():
-    game = Interactive()
-    game.play()
-    # agent = Learning()
-    # agent.train()
+    args = Utils.parser()
+    if args.train:
+        agent = Learning()
+        agent.train(args.train)
+    else:
+        agent = Interactive()
+        agent.play()
 
 
 if __name__ == "__main__":
