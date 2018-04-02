@@ -214,7 +214,7 @@ class Player:
         if state not in finalExclusive:
             stratCount = 4.0
             strat = np.random.choice(["strat1", "strat2", "strat3", "strat4"],
-                                     p=[1/stratCount] * int(stratCount))
+                                     p=[1 / stratCount] * int(stratCount))
             guess = getattr(self, strat)()
         else:
             weightList = final[state]
@@ -243,22 +243,21 @@ class Player:
         return(strat)
 
     def get_current_state(self, strat):
-        # Evaluates the current state of the game
         state = []
-        knownLets = 0
-        knownNotLets = 0
+        known = 0
+        known_not = 0
         for lett in self.alphabet:
             if self.alphabet[lett][1] == 1:
-                knownLets += 1
+                known += 1
             elif self.alphabet[lett][1] == -1:
-                knownNotLets += 1
-        state.append(str(knownLets))
-        state.append(str(knownNotLets))
-        state.append(str(knownLets + knownNotLets))
+                known_not += 1
+        state.append(known)
+        state.append(known_not)
+        state.append(known + known_not)
         state.append(strat[-1])
         state_str = ""
         for info in state:
-            state_str += info + ";"
+            state_str += str(info) + ";"
         state_str = state_str[0:-1]
         return(state_str)
 
@@ -326,25 +325,6 @@ class Player:
         if not letterInPossible:
             return(False)
         return(True)
-
-    def get_current_state(self, strat):
-        state = []
-        known = 0
-        known_not = 0
-        for lett in self.alphabet:
-            if self.alphabet[lett][1] == 1:
-                known += 1
-            elif self.alphabet[lett][1] == -1:
-                known_not += 1
-        state.append(known)
-        state.append(known_not)
-        state.append(known + known_not)
-        state.append(strat[-1])
-        state_str = ""
-        for info in state:
-            state_str += str(info) + ";"
-        state_str = state_str[0:-1]
-        return(state_str)
 
     def find_known_letters(self):
         # Returns a list of known letters or simply False
