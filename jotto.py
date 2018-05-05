@@ -1,67 +1,82 @@
-# The Jottobot
+# AlphaJotto
 # Ben Botvinick & Robert May, 2018
 
-import random
-import string
-import time
-import ast
-import os
+import argparse
+import matplotlib.pyplot as plt
 import numpy as np
+import os
+import string
+import sys
+import time
 
 
-def filearr(file):
-    # Turn a folder into an array
-    words = [line.rstrip('\n') for line in open(file)]
-    return words
+class Utils:
+    def filearr(filename):
+        # Turn a folder into an array
+        words = [line.rstrip("\n") for line in open(filename)]
+        return(words)
+
+    def color(color, text):
+        colors = {
+            "red": "\u001b[31m",
+            "green": "\u001b[32m",
+            "blue": "\u001b[36m"
+        }
+        color = colors[color]
+        return(u"%s%s\u001b[0m" % (color, text))
+
+    def ellipsis(text, seconds):
+        print(text, end="")
+        period = seconds / 3
+        sys.stdout.flush()
+        time.sleep(period)
+        for i in range(3):
+            print(".", end="")
+            sys.stdout.flush()
+            time.sleep(period)
+
+    def truncate(filename):
+        with open(filename, "w") as f:
+            f.truncate()
+
+    def parser():
+        parser = argparse.ArgumentParser(prog="jotto")
+        parser.add_argument("--train", metavar="GAMES", type=int, default=2000,
+                            help="train the agent")
+        args = parser.parse_args()
+        return args
+
+    def graph_training():
+        turns = []
+        timearr = Utils.filearr("jotto_files/turntime.txt")
+        i = 0
+        for timea in timearr:
+            turns.append(int(timea.split(":")[1]))
+            i += 1
+        plt.plot(turns)
+        plt.axis([0, len(timearr), 0, max(turns) + 5])
+        plt.ylabel("Turns in game")
+        plt.xlabel("Game")
+        plt.title("Turns Taken in Each Game")
+        plt.show()
 
 
-def cleanup():
-    os.system("rm states/games/*")
-
-
-def red(text):
-    return (u"\u001b[31m"
-            + text
-            + u"\u001b[0m")
-
-
-def green(text):
-    return (u"\u001b[32m"
-            + text
-            + u"\u001b[0m")
-
-
-def blue(text):
-    return (u"\u001b[36m"
-            + text
-            + u"\u001b[0m")
-
-
-class Computer:
+class Player:
     def __init__(self):
         alphalist = list(string.ascii_lowercase)
         self.alphabet = {}
         for letter in alphalist:
             self.alphabet[letter] = [0, 0, []]
-        self.words = filearr('words/words.txt')[:]
+        self.words = Utils.filearr("word_files/words.txt")[:]
         self.for_guessing = self.words[:]
-        self.norepeat = filearr('words/words_without_repeats.txt')[:]
-        self.repeat = filearr('words/words_with_repeats.txt')[:]
-        self.common_words = filearr('words/common_words.txt')[:]
-        self.choice = random.choice(self.norepeat)
+        self.norepeat = Utils.filearr("word_files/words_no_repeats.txt")[:]
+        self.repeat = Utils.filearr("word_files/words_repeats.txt")[:]
+        self.common_words = Utils.filearr("word_files/common_words.txt")[:]
+        self.choice = np.random.choice(self.norepeat)
         self.own_guesses = {}
         self.possible = self.norepeat[:]
         self.last_guess = ""
-
-    def update_lists(self, guess, common, player):
-        # Fixes stuff
-        if len(sorted(set(guess))) == len(guess):
-            self.norepeat.remove(guess)
-        else:
-            self.repeat.remove(guess)
-        self.for_guessing.remove(guess)
-        if guess in self.possible:
-            self.possible.remove(guess)
+        self.states = []
 
     def strat1(self):
         # Cover as many letters as possible
@@ -72,13 +87,13 @@ class Computer:
                     letters.append(letter)
             letters = sorted(set(letters))
             if len(letters) > 20:
-                guess = random.choice(self.for_guessing)
-                return guess
+                guess = np.random.choice(self.for_guessing)
+                return(guess)
             run = True
             ind = 0
             while run:
                 if len(letters) == 0:
-                    guess = random.choice(self.for_guessing)
+                    guess = np.random.choice(self.for_guessing)
                 if ind < len(self.for_guessing):
                     word = self.for_guessing[ind]
                     if not any(x in word for x in letters):
@@ -90,13 +105,13 @@ class Computer:
                     letters.pop()
                     ind = 0
         else:
-            guess = random.choice(self.for_guessing)
+            guess = np.random.choice(self.for_guessing)
         if guess:
-            return guess
+            return(guess)
 
     def strat2(self):
         # Make the best possible guess
-        return random.choice(self.possible)
+        return(np.random.choice(self.possible))
 
     def strat3(self):
         # Make a guess to find information on a letter
@@ -105,7 +120,7 @@ class Computer:
             if self.alphabet[lett][1] != 0:
                 somehowKnownLetters.append(lett)
         if len(somehowKnownLetters) == 0:
-            return random.choice(self.for_guessing)
+            return(np.random.choice(self.for_guessing))
         otherLetsRequired = 1
         ind = 0
         run = True
@@ -114,7 +129,7 @@ class Computer:
                 ind = 0
                 otherLetsRequired += 1
             if otherLetsRequired == 5:
-                return random.choice(self.for_guessing)
+                return(np.random.choice(self.for_guessing))
                 run = False
             word = self.for_guessing[ind]
             otherCount = 0
@@ -122,14 +137,14 @@ class Computer:
                 if lett not in somehowKnownLetters:
                     otherCount += 1
             if otherCount == otherLetsRequired:
-                return word
+                return(word)
                 run = False
             ind += 1
 
     def strat4(self):
         # Make a guess similar to the last guess with unknown letters
         if self.last_guess == "":
-            return random.choice(self.norepeat)
+            return(np.random.choice(self.norepeat))
         unknownLetsInLast = ""
         for lett in self.last_guess:
             if self.alphabet[lett][1] == 0:
@@ -146,14 +161,20 @@ class Computer:
                 ind = 0
                 evalGoal -= 1
             if evalGoal == 0:
-                return random.choice(self.norepeat)
+                return(np.random.choice(self.norepeat))
                 run = False
-            check = (self.eval_flex(sorted(set(unknownLetsInLast)),
-                     self.norepeat[ind]) == evalGoal
-                     and self.eval_flex(sorted(set(knownLetsInLast)),
-                     self.norepeat[ind]) == 0)
+
+            def eval_flex(lets, guess):
+                common = 0
+                for letter in set(guess):
+                    common += lets.count(letter)
+                return(common)
+            check = (eval_flex(sorted(set(unknownLetsInLast)),
+                               self.norepeat[ind]) == evalGoal
+                     and eval_flex(sorted(set(knownLetsInLast)),
+                                   self.norepeat[ind]) == 0)
             if check:
-                return self.norepeat[ind]
+                return(self.norepeat[ind])
                 run = False
             ind += 1
 
@@ -162,186 +183,123 @@ class Computer:
         common = 0
         for letter in set(guess):
             common += self.choice.count(letter)
-        return common
+        return(common)
 
-    def eval_flex(self, lets, guess):
-        common = 0
-        for letter in set(guess):
-            common += lets.count(letter)
-        return common
-
-    def guess(self):
-        # Chooses a strategy with simple probability
-        # Deprecated since creation of guess_complex()
-        prob1 = 1 / 4.0
-        prob2 = 1 / 4.0
-        prob3 = 1 / 4.0
-        prob4 = 1 / 4.0
-        strat = np.random.choice(['strat1', 'strat2', 'strat3', 'strat4'],
-                                 1,
-                                 p=[prob1, prob2, prob3, prob4])
-        guess = getattr(self, strat[0])()
-        return [strat[0], guess]
-
-    def test_guess(self, turn):
-        # Temporary guess function for testing
-        if turn < 21:
-            return ['strat1', self.strat1()]
+    def update_lists(self, guess, common, check_break):
+        self.update_alphabet(guess, common, check_break)
+        if len(sorted(set(guess))) == len(guess):
+            self.norepeat.remove(guess)
         else:
-            return ['strat2', self.strat2()]
+            self.repeat.remove(guess)
+        self.for_guessing.remove(guess)
+        if guess in self.possible:
+            self.possible.remove(guess)
 
-    def get_current_state(self, turn):
-        # Evaluates the current state of the game
+    def explore(self):
+        # For off-policy learning
+        strat_id = np.random.randint(1, 5)
+        return(["strat%i" % strat_id, getattr(self, "strat%i" % strat_id)()])
+
+    def exploit(self):
+        f = open("./jotto_files/states.txt", "r")
+        full = f.readlines()
+        finalExclusive = []
+        final = {}
+        for line in full:
+            splitLine = line.split(">")
+            finalExclusive.append(splitLine[0])
+            exec("final[splitLine[0]] = %s" % (splitLine[1]))
+        f.close()
+        state = self.get_current_state(" ")[0:-2]
+        if state not in finalExclusive:
+            stratCount = 4.0
+            strat = np.random.choice(["strat1", "strat2", "strat3", "strat4"],
+                                     p=[1 / stratCount] * int(stratCount))
+            guess = getattr(self, strat)()
+        else:
+            weightList = final[state]
+            strat = self.get_strat(weightList)
+            guess = getattr(self, strat)()
+        return([strat, guess])
+
+    def get_strat(self, weights):
+        maxi = [weights[0]]
+        maxInd = [0]
+        i = 0
+        for weight in weights:
+            if weight > maxi[0]:
+                maxi = [weight]
+                maxInd = [i]
+            elif weight == maxi[0]:
+                maxInd.append(i)
+            i += 1
+        # print(weights, )
+        # print(maxi, )
+        # print(maxInd, )
+        choice = np.random.choice(maxInd)
+        # print(choice)
+        strat = "strat" + str(choice + 1)
+        # print(strat)
+        return(strat)
+
+    def get_current_state(self, strat):
         state = []
-        state.append(str(turn))
-        knownLets = 0
-        knownNotLets = 0
+        known = 0
+        known_not = 0
         for lett in self.alphabet:
             if self.alphabet[lett][1] == 1:
-                knownLets += 1
+                known += 1
             elif self.alphabet[lett][1] == -1:
-                knownNotLets += 1
-        state.append(str(knownLets))
-        state.append(str(knownNotLets))
-        return state
-
-    def guess_complex(self, turn):
-        # A better guessing function with complex probability
-        # Deprecated since creation of guess_vs()
-        if len(self.possible) < 4:
-            return ['strat2', self.strat2()]
-        states_arr = filearr("states/states.txt")
-        weights = []
-        successes = {
-                        'strat1': 0,
-                        'strat2': 0,
-                        'strat3': 0,
-                        'strat4': 0
-                    }
-        total_success = 0.0
-        current_state = self.get_current_state(turn)
-        for state in states_arr:
-            state = state.split(";")
-            strat_choice = state.pop(-1)
-            scaled_success = state.pop(-2)
-            if state == current_state:
-                total_success += scaled_success
-                successes[strat_choice] += scaled_success
-                weights.append(strat_choice)
-        if len(weights) != 0:
-            part_weight_c = (0.2 / float(len(weights))) / 2
-            part_weight_s = (0.2 / float(total_success)) / 2
-            prob1 = (0.2 + ((((part_weight_c * (weights.count('strat1'))) * 3)
-                     + ((part_weight_s * (successes['strat1'])) * 5)) / 8))
-            prob2 = (0.2 + ((((part_weight_c * (weights.count('strat2'))) * 3)
-                     + ((part_weight_s * (successes['strat2'])) * 5)) / 8))
-            prob3 = (0.2 + ((((part_weight_c * (weights.count('strat3'))) * 3)
-                     + ((part_weight_s * (successes['strat3'])) * 5)) / 8))
-            prob4 = (0.2 + ((((part_weight_c * (weights.count('strat4'))) * 3)
-                     + ((part_weight_s * (successes['strat4'])) * 5)) / 8))
-        else:
-            prob1 = 1 / 4.0
-            prob2 = 1 / 4.0
-            prob3 = 1 / 4.0
-            prob4 = 1 / 4.0
-        strat = np.random.choice(['strat1', 'strat2', 'strat3', 'strat4'], 1,
-                                 p=[prob1, prob2, prob3, prob4])
-        guess = getattr(self, strat[0])()
-        return [strat[0], guess]
-
-    def guess_vs(self, turn):
-        # A better guessing function
-        if len(self.possible) < 4:
-            return ['strat2', self.strat2()]
-        states_arr = filearr("states/states.txt")
-        weights = []
-        successes = {'strat1': 0, 'strat2': 0, 'strat3': 0, 'strat4': 0}
-        total_success = 0.0
-        current_state = self.get_current_state(turn)
-        for state in states_arr:
-            state = state.split(";")
-            strat_choice = state.pop(-1)
-            scaled_success = state.pop(-2)
-            if state == current_state:
-                total_success += scaled_success
-                successes[strat_choice] += scaled_success
-                weights.append(strat_choice)
-        if len(weights) != 0:
-            part_weight_c = (0.2 / float(len(weights))) / 2
-            part_weight_s = (0.2 / float(total_success)) / 2
-            prob1 = (0.2 + ((((part_weight_c * (weights.count('strat1'))) * 5)
-                     + ((part_weight_s * (successes['strat1'])) * 3)) / 8))
-            prob2 = (0.2 + ((((part_weight_c * (weights.count('strat2'))) * 5)
-                     + ((part_weight_s * (successes['strat2'])) * 3)) / 8))
-            prob3 = (0.2 + ((((part_weight_c * (weights.count('strat3'))) * 5)
-                     + ((part_weight_s * (successes['strat3'])) * 3)) / 8))
-            prob4 = (0.2 + ((((part_weight_c * (weights.count('strat4'))) * 5)
-                     + ((part_weight_s * (successes['strat4'])) * 3)) / 8))
-            weightDict = {
-                            'strat1': prob1,
-                            'strat2': prob2,
-                            'strat3': prob3,
-                            'strat4': prob4
-                         }
-            weightList = []
-            for key, value in sorted(weightDict.iteritems(),
-                                     key=lambda (k, v): (v, k)):
-                weightList.append("%s:%s" % (key, value))
-            strat = weightList.reverse()[0].split(":")[0]
-            guess = getattr(self, strat)()
-            return [strat, guess]
-        else:
-            prob1 = 1 / 4.0
-            prob2 = 1 / 4.0
-            prob3 = 1 / 4.0
-            prob4 = 1 / 4.0
-            strat = np.random.choice(['strat1', 'strat2', 'strat3', 'strat4'],
-                                     1,
-                                     p=[prob1, prob2, prob3, prob4])
-            guess = getattr(self, strat[0])()
-            return [strat[0], guess]
+                known_not += 1
+        state.append(known)
+        state.append(known_not)
+        state.append(known + known_not)
+        state.append(strat[-1])
+        state_str = ""
+        for info in state:
+            state_str += str(info) + ";"
+        state_str = state_str[0:-1]
+        return(state_str)
 
     def update_possible(self):
         # Updates list of possible words
-        knownLets = []
-        knownNotLets = []
+        known = []
+        known_not = []
         for lett in self.alphabet:
             if self.alphabet[lett][1] == 1:
-                knownLets.append(lett)
+                known.append(lett)
             elif self.alphabet[lett][1] == -1:
-                knownNotLets.append(lett)
+                known_not.append(lett)
         ind = 0
         changed = False
         while ind < len(self.possible):
             word = self.possible[ind]
-            knownLetsInd = 0
-            wordRemoved = False
-            while knownLetsInd < len(knownLets) and not wordRemoved:
-                let = knownLets[knownLetsInd]
+            known_ind = 0
+            removed = False
+            while known_ind < len(known) and not removed:
+                let = known[known_ind]
                 if let not in word:
                     self.possible.remove(word)
                     ind -= 1
-                    wordRemoved = True
+                    removed = True
                     changed = True
-                knownLetsInd += 1
-            knownNotLetsInd = 0
-            while knownNotLetsInd < len(knownNotLets) and not wordRemoved:
-                let = knownNotLets[knownNotLetsInd]
+                known_ind += 1
+            known_not_ind = 0
+            while known_not_ind < len(known_not) and not removed:
+                let = known_not[known_not_ind]
                 if let in word:
                     self.possible.remove(word)
                     ind -= 1
-                    wordRemoved = True
+                    removed = True
                     changed = True
-                knownNotLetsInd += 1
+                known_not_ind += 1
             ind += 1
-        return changed
+        return(changed)
 
     def eliminate_letter(self, let):
-        # Returns False if the given letter cannot be in the words
-        # Returns True if nothing can be proven about the letter
         letter = self.alphabet[let]
         if letter[1] == -1:
-            return False
+            return(False)
         letterInPossible = False
         ind = 0
         knownLets = []
@@ -349,24 +307,24 @@ class Computer:
             if self.alphabet[lett][1] == 1:
                 knownLets.append(lett)
         if let in knownLets:
-            return True
+            return(True)
         if len(knownLets) == 5:
-            return False
+            return(False)
         for guess in letter[2]:
             unknownLetsInGuess = self.own_guesses[guess]
             for lett in knownLets:
                 if lett in guess:
                     unknownLetsInGuess -= 1
             if unknownLetsInGuess == 0:
-                return False
+                return(False)
         while ind < len(self.possible) and not letterInPossible:
             word = self.possible[ind]
             if let in word:
                 letterInPossible = True
             ind += 1
         if not letterInPossible:
-            return False
-        return True
+            return(False)
+        return(True)
 
     def find_known_letters(self):
         # Returns a list of known letters or simply False
@@ -398,11 +356,11 @@ class Computer:
                         knownLets.append(lett)
                         self.alphabet[lett][1] = 1
         if knownLets == tempKnownLets:
-            return False
+            return(False)
         else:
-            return knownLets
+            return(knownLets)
 
-    def update_alphabet(self, guess, common, checkBreak):
+    def update_alphabet(self, guess, common, check_break):
         # Super important function that updates the alphabet every turn
         self.last_guess = guess
         self.own_guesses[guess] = common
@@ -411,458 +369,314 @@ class Computer:
                 self.alphabet[letter][1] = -1
             self.alphabet[letter][2].append(guess)
             self.alphabet[letter][0] += 1
-        stillFinding = True
-        stillEliminating = True
-        stillUpdatingPossible = True
-        while stillFinding or stillEliminating or stillUpdatingPossible:
-            stillUpdatingPossible = self.update_possible()
+        finding = True
+        eliminating = True
+        updating = True
+        while finding or eliminating or updating:
+            updating = self.update_possible()
             find_known_letters = self.find_known_letters()
             if find_known_letters is False:
-                stillFinding = False
+                finding = False
             else:
                 for letter in find_known_letters:
                     self.alphabet[letter][1] = 1
-            stillEliminating = False
+            eliminating = False
             for letter in self.alphabet:
                 if (not self.eliminate_letter(letter) and
                         self.alphabet[letter][1] != -1):
                     self.alphabet[letter][1] = -1
-                    stillEliminating = True
-            if len(self.possible) == 0 and checkBreak:
+                    eliminating = True
+            if len(self.possible) == 0 and check_break:
                 os.system("clear")
-                print(red("There are no remaining possible words."))
+                print(Utils.color("red",
+                                  "There are no remaining possible words."))
                 time.sleep(1)
-                print(red("You either cheated or are just an idiot."))
+                print(Utils.color("red",
+                                  "You either cheated or are just an idiot."))
                 time.sleep(1)
-                print(red("Your evaluations were: \n"))
-                for guess, evall in self.own_guesses.iteritems():
+                print(Utils.color("red",
+                                  "Your evaluations were: \n"))
+                for guess, evall in self.own_guesses.items():
                     print("%s: %s" % (guess, evall))
-                raw_input("\nPress [ENTER] to leave the game.")
+                str(input("\nPress [ENTER] to leave the game."))
                 os.system("clear")
                 quit()
 
 
-class JottoBot:
+class Learning:
     def __init__(self):
-        self.sessions = open('states/sessions.txt', 'r+')
-        self.time_file = open('states/turntime.txt', 'a')
-        self.states_file = open('states/states.txt', 'a+')
-        self.sess_id = int(self.sessions.readline()) + 1
-        self.gam = open('states/games/sess' + str(self.sess_id) + '.txt', 'w+')
-        self.gam_string = 'states/games/sess' + str(self.sess_id) + '.txt'
-        self.data = 'states/games/sess' + str(self.sess_id) + '.txt'
+        self.time_file_path = "jotto_files/turntime.txt"
+        self.time_file = open("jotto_files/turntime.txt", "a+")
         self.game_states = ""
 
-    def record_player_state(self,
-                            player,
-                            strategy,
-                            guess,
-                            common,
-                            player_name,
-                            turn):
-        alphabetStr = str(player.alphabet).replace(':', '=>')
-        nowInfo = 0
-        for lett in player.alphabet:
-            if player.alphabet[lett][1] == -1:
-                nowInfo += 1
-            elif player.alphabet[lett][1] == 1:
-                nowInfo += 5
-        if turn != "1":
-            noInd = self.game_states.split("\n")
-            tempGameStates = noInd[:len(self.game_states.split("\n"))-1]
-            tempState = tempGameStates[len(tempGameStates)-2].split(";")
-            pastInfo = int(tempState[len(tempState)-3])
-            learnedInfo = nowInfo - pastInfo
-        else:
-            learnedInfo = nowInfo
-        self.game_states += (player_name + ";" + turn + ";" +
-                             str(alphabetStr) + ';' + strategy + ';' +
-                             guess + ';' + str(common) + ';' +
-                             str(nowInfo) + ';' + str(learnedInfo) + ';\n')
+    def train(self, games):
+        Utils.truncate(self.time_file_path)
+        i = 0
+        while i < games:
+            self.play("explore")
+            self.play("exploit", write=True)
+            i += 1
 
-    def save_game(self):
-        os.system("ruby writer.rb \"%s\" \"%s\"" % (self.game_states,
-                                                    self.gam_string))
-
-    def bad_parser(self, winner, file):
-        data = filearr(self.data)
-        for line in data:
-            point = list(line.split(";"))
-            if point[0] != winner:
-                data.remove(line)
-        for line in data:
-            datap = list(line.split(";"))
-            lettersKnown = 0
-            lettersNot = 0
-            alpha = ast.literal_eval(datap[2])
-            for lett in alpha:
-                if alpha[lett][1] == -1:
-                    lettersNot += 1
-                elif alpha[lett][1] == 1:
-                    lettersKnown += 1
-            self.states_file.write(datap[1] + ";" + str(lettersKnown)
-                                   + ";" + str(lettersNot) + ";"
-                                   + datap[3] + ";\n")
-
-    def parser(self, winner):
-        os.system("ruby parser.rb %s %s" % (winner, self.gam_string))
-
-    def play(self, games):
-        self.sessions.seek(0)
-        self.sessions.truncate()
-        self.sessions.write(str(self.sess_id))
-        game = 1
+    def play(self, style, write=False):
         start_time = time.time()
-        while game <= games:
-            p1 = Computer()
-            p2 = Computer()
-            self.save_game()
-            self.game_states = ""
-            if game != 1:
-                self.gam.write("=")
-            game_over = False
-            winner = None
-            turn = 1
-            while not game_over:
-                guess1 = p1.guess_complex(turn)
-                eval1 = p2.eval_guess(guess1[1])
-                if guess1[1] != p2.choice:
-                    p1.update_lists(guess1[1], eval1, 'p1')
-                    p1.update_alphabet(guess1[1], eval1, True)
-                    self.record_player_state(p1,
-                                             guess1[0],
-                                             guess1[1],
-                                             eval1,
-                                             '1',
-                                             str(turn))
-                    guess2 = p2.guess_complex(turn)
-                    eval2 = p1.eval_guess(guess2[1])
-                    if guess2[1] == p1.choice:
-                        p2.update_lists(guess2[1], eval2, 'p2')
-                        p2.update_alphabet(guess2[1], eval2, False)
-                        self.record_player_state(p2,
-                                                 guess2[0],
-                                                 guess2[1],
-                                                 eval2,
-                                                 '2',
-                                                 str(turn))
-                        print("p2 wins")
-                        game_over = True
-                        winner = "2"
-                    else:
-                        p2.update_lists(guess2[1], eval2, 'p2')
-                        p2.update_alphabet(guess2[1], eval2, True)
-                        self.record_player_state(p2,
-                                                 guess2[0],
-                                                 guess2[1],
-                                                 eval2,
-                                                 '2',
-                                                 str(turn))
+        p1 = Player()
+        p2 = Player()
+        winner = None
+        turn = 1
+        while not winner:
+            guess1 = getattr(p1, style)()
+            eval1 = p2.eval_guess(guess1[1])
+            if guess1[1] != p2.choice:
+                p1.update_lists(guess1[1], eval1, True)
+                p1.states.append(p1.get_current_state(guess1[0]))
+                guess2 = getattr(p2, style)()
+                eval2 = p1.eval_guess(guess2[1])
+                if guess2[1] == p1.choice:
+                    p2.update_lists(guess2[1], eval2, False)
+                    p2.states.append(p2.get_current_state(guess2[0]))
+                    print("p2 wins")
+                    winner = "p2"
+                    self.conclude(p2.states, p1.states, 4)
                 else:
-                    p1.update_lists(guess1[1],
-                                    eval1,
-                                    'p1')
-                    p1.update_alphabet(guess1[1],
-                                       eval1,
-                                       False)
-                    self.record_player_state(p1,
-                                             guess1[0],
-                                             guess1[1],
-                                             eval1,
-                                             '1',
-                                             str(turn))
-                    print("p1 wins")
-                    game_over = True
-                    winner = "1"
-                turn += 1
-            self.save_game()
-            self.game_states = ""
-            game += 1
-            elapsed = time.time() - start_time
-            self.time_file.write(str(round(elapsed, 3))
+                    p2.update_lists(guess2[1], eval2, True)
+                    p2.states.append(p2.get_current_state(guess2[0]))
+            else:
+                p1.update_lists(guess1[1], eval1, False)
+                p1.states.append(p1.get_current_state(guess1[0]))
+                print("p1 wins")
+                winner = "p1"
+                self.conclude(p1.states, p2.states, 4)
+            turn += 1
+        elapsed = time.time() - start_time
+        if write:
+            self.time_file.write(str(round(elapsed, 1.5))
                                  + ":"
                                  + str(turn - 1)
                                  + ":"
-                                 + str(int((turn - 1) / elapsed))
-                                 + ":"
                                  + winner
                                  + "\n")
-            self.parser(winner)
 
-    def play_for_success(self, games):
-        self.sessions.seek(0)
-        self.sessions.truncate()
-        self.sessions.write(str(self.sess_id))
-        game = 1
-        start_time = time.time()
-        while game <= games:
-            p1 = Computer()
-            p2 = Computer()
-            self.save_game()
-            self.game_states = ""
-            if game != 1:
-                self.gam.write("=")
-            game_over = False
-            winner = None
-            turn = 1
-            while not game_over:
-                guess1 = p1.guess_vs(turn)
-                eval1 = p2.eval_guess(guess1[1])
-                if guess1[1] != p2.choice:
-                    p1.update_lists(guess1[1], eval1, 'p1')
-                    p1.update_alphabet(guess1[1], eval1, True)
-                    self.record_player_state(p1,
-                                             guess1[0],
-                                             guess1[1],
-                                             eval1,
-                                             '1',
-                                             str(turn))
-                    guess2 = p2.guess_vs(turn)
-                    eval2 = p1.eval_guess(guess2[1])
-                    if guess2[1] == p1.choice:
-                        p2.update_lists(guess2[1], eval2, 'p2')
-                        p2.update_alphabet(guess2[1], eval2, False)
-                        self.record_player_state(p2,
-                                                 guess2[0],
-                                                 guess2[1],
-                                                 eval2,
-                                                 '2',
-                                                 str(turn))
-                        print("p2 wins")
-                        game_over = True
-                        winner = "2"
-                    else:
-                        p2.update_lists(guess2[1], eval2, 'p2')
-                        p2.update_alphabet(guess2[1], eval2, True)
-                        self.record_player_state(p2,
-                                                 guess2[0],
-                                                 guess2[1],
-                                                 eval2,
-                                                 '2',
-                                                 str(turn))
+    def get_states(self):
+        f = open("./jotto_files/states.txt", "r")
+        full = f.readlines()
+        finalExclusive = []
+        final = {}
+        for line in full:
+            splitLine = line.split(">")
+            finalExclusive.append(splitLine[0])
+            exec("final[splitLine[0]] = %s" % (splitLine[1]))
+        f.close()
+        return(final, finalExclusive)
+
+    def change_weights(self, strat, reward, weights):
+        # print(reward, weights[strat])
+        weights[strat] += 0.01 * (reward - weights[strat])
+        return(weights)
+
+    def conclude(self, winner, loser, strat_count):
+        states, states_exclusive = self.get_states()
+        players = [loser, winner]
+        r = 0
+        while r < 2:
+            for state in players[r]:
+                state_list = state.split(";")
+                strat = int(state_list[-1]) - 1
+                state_temp = ""
+                j = 0
+                while j < len(state_list) - 1:
+                    state_temp += state_list[r] + ";"
+                    j += 1
+                state = state_temp[0:-1]
+                if state not in states_exclusive:
+                    states[state] = [0.5] * strat_count
                 else:
-                    p1.update_lists(guess1[1], eval1, 'p1')
-                    p1.update_alphabet(guess1[1], eval1, False)
-                    self.record_player_state(p1,
-                                             guess1[0],
-                                             guess1[1],
-                                             eval1,
-                                             '1',
-                                             str(turn))
-                    print("p1 wins")
-                    game_over = True
-                    winner = "1"
-                turn += 1
-            self.save_game()
-            self.game_states = ""
-            game += 1
-            elapsed = time.time() - start_time
-            self.time_file.write(str(round(elapsed, 3))
-                                 + ":"
-                                 + str(turn - 1)
-                                 + ":"
-                                 + str(int((turn - 1) / elapsed))
-                                 + ":"
-                                 + winner
-                                 + "\n")
-            self.parser(winner)
+                    states[state] = self.change_weights(strat,
+                                                        r,
+                                                        states[state])
+            r += 1
+        full_str = ""
+        for state in states:
+            full_str += state + ">" + str(states[state]) + "\n"
+        f = open("./jotto_files/states.txt", "w")
+        f.write(full_str)
+        f.close()
 
-    def get_average(self):
-        timearr = filearr(self.time_file)
+    def get_average(self, explore, exploit):
+        timearr = Utils.filearr(self.time_file_path)
         times = []
         for timea in timearr:
             times.append(int(timea.split(":")[1]))
-        first_hun = times[0:99]
-        last_hun = times[-99:]
-        first_avg = np.average(first_hun)
-        last_avg = np.average(last_hun)
-        print(str(first_avg) + "::" + str(last_avg))
+        first_bit = times[0:explore]
+        last_bit = times[-exploit:]
+        first_avg = np.average(first_bit)
+        last_avg = np.average(last_bit)
+        return(str(first_avg) + "::" + str(last_avg))
 
+
+class Interactive:
     def get_guess(self):
         is_good = False
-        alphabet = 'abcdefghijklmnopqrstuvwxyz'
-        wordlist = filearr('words/words.txt')[:]
+        alphabet = "abcdefghijklmnopqrstuvwxyz"
+        wordlist = Utils.filearr("word_files/words.txt")[:]
         while not is_good:
-            what_happened = []
-            word = raw_input("Enter a valid guess (5 letters, "
-                             + "no non-letter characters): ")
+            catches = []
+            word = str(input("Enter a valid guess (5 letters, "
+                             + "no non-letter characters): "))
             is_good = True
             word = word.lower()
             if len(word) != 5:
                 is_good = False
-                what_happened.append(red("-does not meet length requirement "
-                                     + "(5 letters)"))
+                catches.append(Utils.color("red",
+                                           "-does not meet"
+                                           + "length requirement "
+                                           + "(5 letters)"))
             for lett in word:
                 if lett not in alphabet:
                     is_good = False
-                    what_happened.append(red("-non letter character \'"
-                                             + lett + "\' used"))
+                    catches.append(Utils.color("red",
+                                               "-non letter character '"
+                                               + lett
+                                               + "' used"))
             if word not in wordlist:
                 is_good = False
-                what_happened.append(red("-word does not exist"))
+                catches.append(Utils.color("red",
+                                           "-word does not exist"))
             if not is_good:
                 os.system("clear")
-                print(red("Your guess is invalid. Guess caught at:"))
-                for catch in what_happened:
+                print(Utils.color("red",
+                                  "Your guess is invalid. Guess caught at:"))
+                for catch in catches:
                     print("    %s" % (catch))
-                raw_input("Press [ENTER] to go back to guessing.")
+                str(input("Press [ENTER] to go back to guessing."))
                 os.system("clear")
-        return word
+        return(word)
 
     def get_eval(self, guess):
         is_good = False
-        nums = ['0', '1', '2', '3', '4', '5']
-
+        nums = ["0", "1", "2", "3", "4", "5"]
         while not is_good:
             print("My guess is: %s" % (guess))
-            evaluation = raw_input("Evaluate my guess (an integer 0-5): ")
+            evaluation = str(input("Evaluate my guess (an integer 0-5): "))
             is_good = True
-            what_happened = []
+            catches = []
             if evaluation not in nums:
-                if evaluation.lower() == 'true':
-                    return "Same"
+                if evaluation.lower() == "true":
+                    return(-1)
                 is_good = False
                 if evaluation.isdigit():
-                    what_happened.append(red("-evaluation greater than five"))
+                    catches.append(Utils.color("red",
+                                               "-evaluation greater "
+                                               + "than five"))
                 else:
-                    what_happened.append(red("-non number character used"))
+                    catches.append(Utils.color("red",
+                                               "-non number "
+                                               + "character used"))
             if evaluation.isdigit():
                 if int(evaluation) > len(sorted(set(guess))):
                     is_good = False
-                    what_happened.append(blue("-evaluation greater than "
-                                              + "amount of unique letters "
-                                              + "in guess")
-                                         + "\nTIP: only count "
-                                         + "repeated letters once!")
+                    catches.append(Utils.color("red",
+                                               "-evaluation greater than "
+                                               + "amount of unique letters "
+                                               + "in guess")
+                                   + "\nTIP: only count "
+                                   + "repeated letters once!")
             if not is_good:
                 os.system("clear")
-                print(red("Your evaluation is invalid. Evaluation caught at:"))
-                for catch in what_happened:
+                print(Utils.color("red",
+                                  "Your evaluation is invalid. "
+                                  + "Evaluation caught at:"))
+                for catch in catches:
                     print("    %s" % (catch))
-                raw_input("Press [ENTER] to go back to guess evaluation.")
+                str(input("Press [ENTER] to go back to guess evaluation."))
                 os.system("clear")
-        return int(evaluation)
+        return(int(evaluation))
 
-    def play_human(self):
-        # Play against a human
-        comp = Computer()
-        game_over = False
-        game_results = {
-                        "winner": str(),
-                        "my_word": comp.choice,
-                        "guesses": int(),
-                        "p1_guesses": {},
-                        "p2_guesses": {}
-                       }
-        os.system("clear")
-        print("The game is about to begin. Good luck...")
-        time.sleep(3)
-        os.system("clear")
-        print("First, choose your word.")
-        raw_input("Press [ENTER] once you have chosen a word.")
-        os.system("clear")
-        turn = 0
-        while not game_over:
-            turn += 1
-            guess1 = self.get_guess()
-            eval1 = comp.eval_guess(guess1)
-            game_results["p1_guesses"][str(guess1)] = eval1
-            if guess1 != comp.choice:
-                print("My evaluation of your guess: %s" % (eval1))
-                raw_input("Press [ENTER] to continue.")
-                os.system("clear")
-                guess2 = comp.guess_vs(turn)
-                if turn == 1:
-                    print("NOTE: When you evaluate a guess, "
-                          + "only count repeated "
-                          + "letters once. \n      If the guess is"
-                          + " the same as "
-                          + "your word, reply "
-                          + "'true'.")
-                    # *** MAD DEPRICATED ***
-                    # eval_tool = raw_input("Do you want to open "
-                    #                       + "the evaluator tool in a "
-                    #                       + "separate window? [y/n]: ")
-                    # continue_program = False
-                    # while not continue_program:
-                    #     if eval_tool == "y":
-                    #         os.system("python evaluator.py")
-                    #     elif eval_tool == "n":
-                    #         continue_program = True
-                    #     else:
-                    #         eval_tool = raw_input("\033[F\033[KPlease enter"
-                    #                               + " 'y' or 'n': ")
-                    print(red("CAUTION: If your evaluation is incorrect, "
-                              + "the program will break."))
-                    raw_input("Press [ENTER] to continue.")
+    def play(self):
+        try:
+            comp = Player()
+            game_over = False
+            game_results = {
+                "winner": str(),
+                "my_word": comp.choice,
+                "guesses": int(),
+                "p1_guesses": {},
+                "p2_guesses": {}
+            }
+            os.system("clear")
+            Utils.ellipsis("The game is about to begin. Good luck", 1.5)
+            os.system("clear")
+            print("First, choose your word.")
+            str(input("Press [ENTER] once you have chosen a word."))
+            os.system("clear")
+            turn = 0
+            while not game_over:
+                turn += 1
+                guess1 = self.get_guess()
+                eval1 = comp.eval_guess(guess1)
+                game_results["p1_guesses"][str(guess1)] = eval1
+                if guess1 != comp.choice:
+                    print("My evaluation of your guess: %s" % (eval1))
+                    str(input("Press [ENTER] to continue."))
                     os.system("clear")
-                eval2 = self.get_eval(guess2[1])
-                game_results["p2_guesses"][str(guess2)] = eval2
-                os.system("clear")
-                if eval2 == "Same":
+                    guess2 = comp.exploit()
+                    if turn == 1:
+                        print("NOTE: When you evaluate a guess, "
+                              + "only count repeated "
+                              + "letters once. \n      If the guess is"
+                              + " the same as "
+                              + "your word, reply "
+                              + "'true'.")
+                        print(Utils.color("red",
+                                          "CAUTION: If your evaluation is "
+                                          + "incorrect, the program "
+                                          + "will break."))
+                        str(input("Press [ENTER] to continue."))
+                        os.system("clear")
+                    eval2 = self.get_eval(guess2[1])
+                    game_results["p2_guesses"][str(guess2)] = eval2
                     os.system("clear")
-                    print(green("I won!"))
-                    game_results["winner"] = "Computer"
-                    print("My word was "
-                          + comp.choice
-                          + ".")
-                    raw_input("Press [ENTER] to leave the game.")
+                    if eval2 == -1:
+                        os.system("clear")
+                        print(Utils.color("green", "I won!"))
+                        game_results["winner"] = "Player"
+                        print("My word was "
+                              + comp.choice
+                              + ".")
+                        str(input("Press [ENTER] to leave the game."))
+                        game_over = True
+                        os.system("clear")
+                    else:
+                        comp.update_lists(guess2[1], eval2, True)
+                else:
+                    os.system("clear")
+                    print(Utils.color("green", "You won!"))
+                    game_results["winner"] = "Human"
+                    print("I had "
+                          + str(len(comp.possible))
+                          + " words in my "
+                          + "possible word list.")
+                    str(input("Press [ENTER] to leave the game."))
                     game_over = True
                     os.system("clear")
-                else:
-                    comp.update_lists(guess2[1], eval2, 'comp')
-                    comp.update_alphabet(guess2[1], eval2, True)
-            else:
-                os.system("clear")
-                print(green("You won!"))
-                game_results["winner"] = "Human"
-                print("I had "
-                      + str(len(comp.possible))
-                      + " words in my "
-                      + "possible word list.")
-                raw_input("Press [ENTER] to leave the game.")
-                game_over = True
-                os.system("clear")
-        game_results["guesses"] = len(game_results["p1_guesses"])
-        return(game_results)
-
-    def thermal(self, results):
-        # This is only useful to Ben and Robert (they have a Pi)
-        os.system("echo -e \"%s\n\" > /dev/ttyUSB0")
-
-
-def check_average():
-    timearr = filearr("states/turntime.txt")
-    times = []
-    for timea in timearr:
-        times.append(int(timea.split(":")[1]))
-    first_hun = times[0:99]
-    last_hun = times[-99:]
-    first_avg = np.average(first_hun)
-    last_avg = np.average(last_hun)
-    print(str(first_avg) + "::" + str(last_avg))
-
-
-def play_success():
-    game = JottoBot()
-    game.play_for_success(1)
-
-
-def play_normal():
-    game = JottoBot()
-    game.play(1)
+            game_results["guesses"] = len(game_results["p1_guesses"])
+            showGraph = str(input("Show graph of improvement? [y/n]: "))
+            if showGraph[0].lower() == "y":
+                Utils.graph_training()
+            return(game_results)
+        except KeyboardInterrupt:
+            os.system("clear")
+            Utils.ellipsis("Aborting", 3)
+            os.system("clear")
 
 
 def main():
-    # *** FOR TRAINING ***
-    # for i in range(0, 1000):
-    #     play_normal()
-    # for i in range(0, 100):
-    #     play_success()
-    # check_average()
-    # *** FOR HUMAN PLAY ***
-    game = JottoBot()
-    game.play_human()
+    args = Utils.parser()
+    if args.train:
+        agent = Learning()
+        agent.train(args.train)
+    else:
+        agent = Interactive()
+        agent.play()
 
 
 if __name__ == "__main__":
