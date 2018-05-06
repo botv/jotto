@@ -46,19 +46,21 @@ class Utils:
         args = parser.parse_args()
         return args
 
-    def graph_training():
+    def graphTraining():
         turns = []
-        timearr = Utils.filearr("jotto_files/turntime.txt")
-        i = 0
-        for timea in timearr:
-            turns.append(int(timea.split(":")[1]))
-            i += 1
-        plt.plot(turns)
-        plt.axis([0, len(timearr), 0, max(turns) + 5])
-        plt.ylabel("Turns in game")
-        plt.xlabel("Game")
-        plt.title("Turns Taken in Each Game")
-        plt.show()
+        timearr = Utils.filearr("jotto_files/turntimeperm.txt")
+        print(timearr)
+        if len(timearr) > 0:
+            i = 0
+            for timea in timearr:
+                turns.append(int(timea.split(":")[1]))
+                i += 1
+            plt.plot(turns)
+            plt.axis([0, len(timearr), 0, max(turns) + 5])
+            plt.ylabel("Turns in game")
+            plt.xlabel("Game")
+            plt.title("Turns Taken in Each Game")
+            plt.show()
 
 
 class Player:
@@ -406,7 +408,8 @@ class Player:
 class Learning:
     def __init__(self):
         self.time_file_path = "jotto_files/turntime.txt"
-        self.time_file = open("jotto_files/turntime.txt", "a+")
+        self.time_file = open("jotto_files/turntime.txt", "a")
+        self.time_file_perm = open("jotto_files/turntimeperm.txt", "a")
         self.game_states = ""
 
     def train(self, games):
@@ -449,12 +452,19 @@ class Learning:
             turn += 1
         elapsed = time.time() - start_time
         if write:
-            self.time_file.write(str(round(elapsed, 1.5))
+            self.time_file.write(str(round(elapsed, 1))
                                  + ":"
                                  + str(turn - 1)
                                  + ":"
-                                 + winner
+                                 + str(winner)
                                  + "\n")
+            self.time_file_perm.write(str(round(elapsed, 1))
+                                 + ":"
+                                 + str(turn - 1)
+                                 + ":"
+                                 + str(winner)
+                                 + "\n")
+
 
     def get_states(self):
         f = open("./jotto_files/states.txt", "r")
@@ -484,7 +494,7 @@ class Learning:
                 state_temp = ""
                 j = 0
                 while j < len(state_list) - 1:
-                    state_temp += state_list[r] + ";"
+                    state_temp += state_list[j] + ";"
                     j += 1
                 state = state_temp[0:-1]
                 if state not in states_exclusive:
@@ -661,7 +671,7 @@ class Interactive:
             game_results["guesses"] = len(game_results["p1_guesses"])
             showGraph = str(input("Show graph of improvement? [y/n]: "))
             if showGraph[0].lower() == "y":
-                Utils.graph_training()
+                Utils.graphTraining()
             return(game_results)
         except KeyboardInterrupt:
             os.system("clear")
@@ -671,12 +681,15 @@ class Interactive:
 
 def main():
     args = Utils.parser()
-    if args.train:
-        agent = Learning()
-        agent.train(args.train)
-    else:
-        agent = Interactive()
-        agent.play()
+    agent = Interactive()
+    agent.play()
+    # if args.train:
+    #     agent = Learning()
+    #     agent.train(args.train)
+    #     Utils.graphTraining()
+    # else:
+    #     agent = Interactive()
+    #     agent.play()
 
 
 if __name__ == "__main__":
